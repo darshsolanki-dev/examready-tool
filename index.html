@@ -861,23 +861,24 @@ function triggerDirectDownload() {
   document.body.removeChild(a);
 }
 
-// Download Button With Direct Smartlink Trigger
+// Download Button: 1st Download Clean, 2nd Download se Smartlink Ad Trigger
 el.download.addEventListener("click", () => {
   checkExpiryAndReset();
   const pro = isProActive();
+  const currentUsage = getUsageCount();
 
-  // 1. Naye tab me sponsor/ad smartlink kholega (Creator revenue generate karne ke liye)
-  if (!isCreatorAdmin() && ADSTERRA_DIRECT_LINK) {
+  // 1st Download (currentUsage === 0) bilkul clean chalega!
+  // 2nd Download se (currentUsage >= 1) sponsor Smartlink trigger hoga:
+  if (!isCreatorAdmin() && ADSTERRA_DIRECT_LINK && currentUsage >= 1) {
     window.open(ADSTERRA_DIRECT_LINK, "_blank");
   }
 
-  // 2. Original tab me photo download karega
+  // File Download Execution
   if (pro.active) {
     triggerDirectDownload();
     return;
   }
 
-  const currentUsage = getUsageCount();
   if (currentUsage >= MAX_FREE_USAGE) {
     showPaywall();
   } else {
