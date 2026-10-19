@@ -16,6 +16,15 @@
   <link rel="manifest" href="/site.webmanifest">
   <link rel="shortcut icon" href="/favicon.ico">
 
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
+
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
@@ -431,6 +440,12 @@ let isProcessing = false;
 let operationId = 0;
 let countdownInterval = null;
 let selectedPlanType = 'single';
+
+// URL Param Check for App Shortcuts (?mode=signature)
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get("mode") === "signature") {
+  setMode("signature");
+}
 
 // --- RELIABLE 10-CLICK OWNER / ADMIN ENGINE ---
 let adminClicks = 0;
@@ -867,8 +882,8 @@ el.download.addEventListener("click", () => {
   const pro = isProActive();
   const currentUsage = getUsageCount();
 
-  // 1st Download (currentUsage === 0) bilkul clean chalega!
-  // 2nd Download se (currentUsage >= 1) sponsor Smartlink trigger hoga:
+  // 1st Download (currentUsage === 0) bilkul clean rahega.
+  // 2nd Download se (currentUsage >= 1) sponsor ad open hoga:
   if (!isCreatorAdmin() && ADSTERRA_DIRECT_LINK && currentUsage >= 1) {
     window.open(ADSTERRA_DIRECT_LINK, "_blank");
   }
