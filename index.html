@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#4f46e5">
-  <title>Sarkari Photo Resizer 20KB to 50KB & Signature Converter — ExamReady</title>
-  <meta name="description" content="Free online Sarkari Photo Resizer. Compress passport photo to 20-50 KB and signature to 10-20 KB for SSC, Railway, UPSC, State Police exam forms. No upload, instant 100% private.">
-  <meta name="keywords" content="sarkari photo resizer, photo 20kb to 50kb, signature 10kb to 20kb, ssc photo resizer, upsc photo resizer, exam photo size reduce">
+  <title>Photo Compressor — Convert Photo MB to KB (20KB to 50KB) Free Online</title>
+  <meta name="description" content="Free online photo converter and photo compressor. Reduce photo size from MB to KB (20KB–50KB) and signature to 10–20 KB for Sarkari, SSC, UPSC exam forms. Instant, private, in-browser.">
+  <meta name="keywords" content="photo compressor, photo converter, photo mb to kb, image compressor mb to kb, photo 20kb to 50kb, resize photo to 20kb, ssc photo resizer, sarkari photo resizer">
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -48,8 +48,8 @@
     <div id="admin-secret-logo" class="flex items-center gap-3 select-none cursor-pointer">
       <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-xl text-white shadow-sm">▧</div>
       <div>
-        <div class="text-lg font-extrabold text-slate-900 leading-tight">Exam<span class="text-indigo-600">Ready</span></div>
-        <div class="text-[11px] text-slate-500">Photo & Signature Optimizer</div>
+        <div class="text-lg font-extrabold text-slate-900 leading-tight">Photo<span class="text-indigo-600">Compressor</span></div>
+        <div class="text-[11px] text-slate-500">Photo Converter · MB to KB (20KB–50KB)</div>
       </div>
     </div>
     
@@ -317,12 +317,12 @@
 <div id="donation-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/75 p-4 backdrop-blur-sm hidden">
   <div class="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl border border-slate-100 text-center">
     <div class="text-3xl mb-1">☕</div>
-    <h3 class="text-lg font-bold text-slate-900">Support ExamReady</h3>
+    <h3 class="text-lg font-bold text-slate-900">Support PhotoCompressor</h3>
     <p class="text-xs text-slate-500 mt-1">Ek chai ke barabar contribution server online rakhta hai.</p>
 
     <div class="flex justify-center my-3">
       <div class="p-2 border border-slate-200 rounded-2xl bg-white shadow-sm">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa=6351695089@fam%26pn=ExamReadySupport%26am=10%26cu=INR" 
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa=6351695089@fam%26pn=PhotoCompressorSupport%26am=10%26cu=INR" 
              alt="Donation QR" class="h-32 w-32 rounded-lg">
       </div>
     </div>
@@ -339,7 +339,7 @@
 
 <footer class="mt-10 border-t border-slate-200 bg-white">
   <div class="mx-auto max-w-6xl px-4 py-5 text-center text-xs text-slate-500">
-    ExamReady · Privacy First Image Compression · Automatic 24h Reset
+    PhotoCompressor · Privacy First Image Compression · Automatic 24h Reset
   </div>
 </footer>
 
@@ -352,8 +352,8 @@ const RESET_MS = RESET_HOURS * 60 * 60 * 1000;
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
 
 const PRESETS = {
-  passport: { width: 350, height: 450, minKB: 20, maxKB: 50, label: "Passport Photo", filename: "examready-passport.jpg" },
-  signature: { width: 300, height: 120, minKB: 10, maxKB: 20, label: "Signature", filename: "examready-signature.jpg" }
+  passport: { width: 350, height: 450, minKB: 20, maxKB: 50, label: "Passport Photo", filename: "photocompressor-passport.jpg" },
+  signature: { width: 300, height: 120, minKB: 10, maxKB: 20, label: "Signature", filename: "photocompressor-signature.jpg" }
 };
 
 const $ = id => document.getElementById(id);
@@ -418,7 +418,7 @@ adminTrigger.addEventListener("click", function(e) {
   clearTimeout(clickResetTimer);
   clickResetTimer = setTimeout(() => {
     adminClicks = 0;
-  }, 8000); // 8 seconds window
+  }, 8000);
 
   if (adminClicks >= 10) {
     adminClicks = 0;
@@ -445,7 +445,6 @@ function checkExpiryAndReset() {
 
   const now = Date.now();
 
-  // Check 30-Day Monthly Subscription
   const monthlyExpiry = localStorage.getItem("examready_monthly_expiry");
   if (monthlyExpiry) {
     if (now > parseInt(monthlyExpiry, 10)) {
@@ -456,7 +455,6 @@ function checkExpiryAndReset() {
     }
   }
 
-  // Check 24-Hour Free Credits Reset
   const lastReset = localStorage.getItem("examready_last_reset");
   if (!lastReset) {
     localStorage.setItem("examready_last_reset", now.toString());
@@ -584,7 +582,7 @@ function startTimer(durationSeconds) {
 
 $("show-qr-btn").addEventListener("click", () => {
   const amount = (selectedPlanType === 'single') ? getCurrentSinglePrice() : 129;
-  const upiUrl = `upi://pay?pa=6351695089@fam%26pn=ExamReady%26am=${amount}%26cu=INR`;
+  const upiUrl = `upi://pay?pa=6351695089@fam%26pn=PhotoCompressor%26am=${amount}%26cu=INR`;
   el.dynamicQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUrl)}`;
 
   el.payInitialStep.classList.add("hidden");
