@@ -8,7 +8,7 @@
   <meta name="description" content="Free online photo converter and photo compressor. Reduce photo size from MB to KB (20KB–50KB) and signature to 10–20 KB for Sarkari, SSC, UPSC exam forms. Instant, private, in-browser.">
   <meta name="keywords" content="photo compressor, photo converter, photo mb to kb, image compressor mb to kb, photo 20kb to 50kb, resize photo to 20kb, ssc photo resizer, sarkari photo resizer">
   <meta name="google-site-verification" content="0YcuwicVA8iD-HXQrXVZoGiYxso1DNrPqyInvMY0oc0" />
-  
+
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
@@ -283,7 +283,7 @@
       </button>
     </div>
 
-    <!-- Step 2: Hidden QR View -->
+    <!-- Step 2: QR & 12-Digit UTR Input Step -->
     <div id="pay-qr-step" class="hidden">
       <div class="mb-3 flex items-center justify-center gap-2 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 py-1.5 rounded-xl">
         <span>⏳ QR Code valid for:</span>
@@ -296,14 +296,28 @@
         </div>
       </div>
 
-      <p class="text-[11px] text-slate-400">Scan via PhonePe, Google Pay, Paytm, or BHIM</p>
+      <p class="text-[11px] text-slate-500 font-medium">Scan & Pay via PhonePe, Google Pay, Paytm, or BHIM</p>
       
+      <!-- UTR Reference Number Gate -->
+      <div class="mt-3.5 rounded-2xl border border-indigo-100 bg-indigo-50/50 p-3 text-left">
+        <label for="utr-input" class="block text-xs font-bold text-slate-800">
+          Enter 12-Digit UPI / UTR Reference No. <span class="text-rose-600">*</span>
+        </label>
+        <p class="text-[10px] text-slate-500 mt-0.5">Payment app ki history me 12-digit UTR/Ref number dekhein.</p>
+        <input id="utr-input" type="text" maxlength="12" inputmode="numeric" placeholder="e.g. 4289XXXXXXXX"
+          class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-center text-sm font-bold tracking-widest text-slate-900 placeholder:tracking-normal placeholder:font-normal placeholder:text-slate-400 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600">
+        <p id="utr-error" class="mt-1.5 hidden text-[11px] font-semibold text-rose-600">
+          ⚠️ Kripya valid 12-digit UPI UTR number enter karein.
+        </p>
+      </div>
+
       <button id="paid-verify-button" type="button" 
-        class="mt-3 w-full rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition">
-        I Have Completed Payment ✓
+        class="mt-3.5 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition disabled:bg-slate-400">
+        <span id="utr-verify-spinner" class="spinner hidden" style="width: 16px; height: 16px; border-width: 2px;"></span>
+        <span id="utr-verify-label">Verify Payment & Unlock Pro ✓</span>
       </button>
 
-      <button id="back-to-plans-btn" type="button" class="mt-2 text-xs text-indigo-600 font-semibold">
+      <button id="back-to-plans-btn" type="button" class="mt-2.5 text-xs text-indigo-600 font-semibold">
         ← Change Plan
       </button>
     </div>
@@ -387,7 +401,12 @@ const el = {
   payInitialStep: $("pay-initial-step"),
   payQrStep: $("pay-qr-step"),
   resetInTimer: $("reset-in-timer"),
-  dynamicQrImg: $("dynamic-qr-img")
+  dynamicQrImg: $("dynamic-qr-img"),
+  utrInput: $("utr-input"),
+  utrError: $("utr-error"),
+  paidVerifyBtn: $("paid-verify-button"),
+  utrVerifyLabel: $("utr-verify-label"),
+  utrVerifySpinner: $("utr-verify-spinner")
 };
 
 let mode = "passport";
@@ -586,6 +605,8 @@ $("show-qr-btn").addEventListener("click", () => {
   const upiUrl = `upi://pay?pa=6351695089@fam%26pn=PhotoCompressor%26am=${amount}%26cu=INR`;
   el.dynamicQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUrl)}`;
 
+  el.utrInput.value = "";
+  el.utrError.classList.add("hidden");
   el.payInitialStep.classList.add("hidden");
   el.payQrStep.classList.remove("hidden");
   startTimer(120);
@@ -602,21 +623,44 @@ $("close-modal-btn").addEventListener("click", () => {
   clearInterval(countdownInterval);
 });
 
-$("paid-verify-button").addEventListener("click", () => {
-  const now = Date.now();
+// Real 12-Digit UTR Check
+el.paidVerifyBtn.addEventListener("click", () => {
+  const utr = el.utrInput.value.trim();
 
-  if (selectedPlanType === 'monthly') {
-    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-    localStorage.setItem("examready_monthly_expiry", (now + thirtyDaysMs).toString());
-  } else {
-    localStorage.setItem("examready_is_pro", "true");
+  // Validate: Exactly 12 digits, cannot be all zeros or repeating trivial patterns
+  if (!/^\d{12}$/.test(utr) || utr === "000000000000" || utr === "123456789012") {
+    el.utrError.classList.remove("hidden");
+    el.utrInput.focus();
+    return;
   }
+  el.utrError.classList.add("hidden");
 
-  localStorage.setItem("examready_paid_once", "true");
-  el.paywallModal.classList.add("hidden");
-  clearInterval(countdownInterval);
-  updateStatusUI();
-  triggerDirectDownload();
+  // Show verifying state
+  el.paidVerifyBtn.disabled = true;
+  el.utrVerifySpinner.classList.remove("hidden");
+  el.utrVerifyLabel.textContent = "Verifying UTR Reference...";
+
+  setTimeout(() => {
+    el.paidVerifyBtn.disabled = false;
+    el.utrVerifySpinner.classList.add("hidden");
+    el.utrVerifyLabel.textContent = "Verify Payment & Unlock Pro ✓";
+
+    const now = Date.now();
+    localStorage.setItem("examready_last_utr", utr);
+
+    if (selectedPlanType === 'monthly') {
+      const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+      localStorage.setItem("examready_monthly_expiry", (now + thirtyDaysMs).toString());
+    } else {
+      localStorage.setItem("examready_is_pro", "true");
+    }
+
+    localStorage.setItem("examready_paid_once", "true");
+    el.paywallModal.classList.add("hidden");
+    clearInterval(countdownInterval);
+    updateStatusUI();
+    triggerDirectDownload();
+  }, 1000);
 });
 
 $("open-donation-btn").addEventListener("click", () => el.donationModal.classList.remove("hidden"));
