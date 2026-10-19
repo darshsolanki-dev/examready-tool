@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="description" content="Free passport photo and signature resizer for government exams. In-browser processing.">
+  <title>ExamReady — Photo & Signature Resizer</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body { background: #f8fafc; }
+    .drop-zone { transition: .2s; }
+    .drop-zone.dragging {
+      border-color: #4f46e5;
+      background: #eef2ff;
+      transform: scale(1.01);
+    }
+    .spinner {
+      width: 22px;
+      height: 22px;
+      border: 3px solid #c7d2fe;
+      border-top-color: #4f46e5;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .preview-image {
+      max-height: 280px;
+      max-width: 100%;
+      object-fit: contain;
+    }
+    #admin-secret-logo {
+      transition: transform 0.15s ease-in-out;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen font-sans text-slate-800 antialiased relative">
+
+<header class="border-b border-slate-200 bg-white">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+    <!-- Secret 10-tap Logo -->
+    <div id="admin-secret-logo" class="flex items-center gap-3 select-none cursor-pointer">
+      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-xl text-white shadow-sm">▧</div>
+      <div>
+        <div class="text-lg font-extrabold text-slate-900 leading-tight">Exam<span class="text-indigo-600">Ready</span></div>
+        <div class="text-[11px] text-slate-500">Photo & Signature Optimizer</div>
+      </div>
+    </div>
+    
+    <!-- Dynamic Plan / Free Badge -->
+    <div id="status-badge" class="rounded-full border border-indigo-200 bg-indigo-50 px-3.5 py-1.5 text-xs font-semibold text-indigo-700">
+      Free: <span id="credit-count" class="font-bold">4</span> left (24h Quota)
+    </div>
+  </div>
+</header>
+
+<main class="mx-auto max-w-6xl px-4 py-7 sm:px-6 sm:py-10">
+
+  <!-- Top Ad Space -->
+  <div class="mb-7 flex min-h-[60px] items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white text-xs text-slate-400">
+    Advertisement space
+  </div>
+
+  <section class="mb-8 text-center">
+    <div class="mb-3 inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3.5 py-1.5 text-xs font-semibold text-indigo-700">
+      <span>✓</span> 100% Client-Side Processing · SSC, Railway, UPSC, Police Ready
+    </div>
+    <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+      Your exam photo, <span class="text-indigo-600">ready to upload.</span>
+    </h1>
+    <p class="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+      Instant photo (20–50 KB) & signature (10–20 KB) compression without downloading apps.
+    </p>
+  </section>
+
+  <!-- Preset Selection -->
+  <section class="mx-auto mb-6 grid max-w-3xl grid-cols-2 gap-3">
+    <button id="passport-mode" type="button"
+      class="rounded-2xl border-2 border-indigo-600 bg-indigo-50 p-4 text-left">
+      <div class="mb-2 flex justify-between">
+        <span class="text-2xl">🪪</span>
+        <span id="passport-check" class="font-bold text-indigo-600">✓</span>
+      </div>
+      <div class="font-bold text-slate-900">Passport Photo</div>
+      <div class="mt-1 text-xs text-slate-600">350 × 450 px · 20–50 KB</div>
+    </button>
+
+    <button id="signature-mode" type="button"
+      class="rounded-2xl border-2 border-slate-200 bg-white p-4 text-left hover:border-indigo-300">
+      <div class="mb-2 flex justify-between">
+        <span class="text-2xl">✍️</span>
+        <span id="signature-check" class="hidden font-bold text-indigo-600">✓</span>
+      </div>
+      <div class="font-bold text-slate-900">Signature</div>
+      <div class="mt-1 text-xs text-slate-600">300 × 120 px · 10–20 KB</div>
+    </button>
+  </section>
+
+  <div class="mx-auto grid max-w-5xl gap-6 lg:grid-cols-2">
+
+    <!-- Upload Box -->
+    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+      <h2 class="text-lg font-bold text-slate-900">1. Select Image</h2>
+      <p class="mt-1 mb-5 text-sm text-slate-500">Pick image from your gallery or desktop.</p>
+
+      <label id="drop-zone" for="file-input"
+        class="drop-zone flex min-h-64 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center hover:border-indigo-400 hover:bg-indigo-50/50">
+        <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-100 text-3xl text-indigo-600">↑</div>
+        <span class="font-bold text-slate-900">Choose Image or Drop here</span>
+        <span class="mt-4 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white">Browse File</span>
+        <span class="mt-3 text-xs text-slate-400">JPG, PNG or WebP · Max 20 MB</span>
+      </label>
+
+      <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp" class="sr-only">
+
+      <div id="source-info" class="mt-4 hidden rounded-xl bg-slate-50 p-3">
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p id="source-name" class="truncate text-sm font-semibold"></p>
+            <p id="source-meta" class="mt-1 text-xs text-slate-500"></p>
+          </div>
+          <button id="remove-file" type="button" class="rounded-lg px-3 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50">Remove</button>
+        </div>
+      </div>
+
+      <button id="process-button" type="button" disabled
+        class="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3.5 font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300">
+        <span id="process-spinner" class="spinner hidden"></span>
+        <span id="process-label">Optimize Image</span>
+      </button>
+    </section>
+
+    <!-- Preview Box -->
+    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+      <h2 class="text-lg font-bold text-slate-900">2. Download output</h2>
+      <p class="mt-1 mb-5 text-sm text-slate-500">Check size before downloading.</p>
+
+      <div id="empty-preview" class="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-5 text-center">
+        <div class="text-4xl text-slate-300">▧</div>
+        <p class="mt-3 font-semibold text-slate-600">Output will appear here</p>
+        <p class="mt-1 text-sm text-slate-400">Upload your file to test.</p>
+      </div>
+
+      <div id="result-panel" class="hidden">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="rounded-xl border border-slate-200 p-3">
+            <p class="mb-3 text-xs font-semibold uppercase text-slate-500">Original</p>
+            <div class="flex h-36 items-center justify-center overflow-hidden rounded-lg bg-slate-50">
+              <img id="original-preview" class="preview-image" alt="Original">
+            </div>
+            <p id="original-details" class="mt-2 text-xs text-slate-500"></p>
+          </div>
+
+          <div class="rounded-xl border border-emerald-200 bg-emerald-50/30 p-3">
+            <p class="mb-3 text-xs font-semibold uppercase text-emerald-700">Compressed</p>
+            <div class="flex h-36 items-center justify-center overflow-hidden rounded-lg bg-white">
+              <img id="result-preview" class="preview-image" alt="Result">
+            </div>
+            <p id="result-details" class="mt-2 text-xs font-semibold text-emerald-700"></p>
+          </div>
+        </div>
+
+        <div id="status-card" class="mt-4 rounded-xl border p-3">
+          <div class="flex items-start gap-2.5">
+            <span id="status-icon" class="text-lg">✓</span>
+            <div>
+              <p id="status-title" class="text-sm font-bold"></p>
+              <p id="status-message" class="text-xs leading-4 mt-0.5 text-slate-600"></p>
+            </div>
+          </div>
+        </div>
+
+        <button id="download-button" type="button"
+          class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3.5 text-center font-bold text-white shadow-sm hover:bg-emerald-700 transition">
+          ↓ Download Form-Ready JPG
+        </button>
+      </div>
+
+      <div id="error-panel" role="alert" class="mt-4 hidden rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"></div>
+    </section>
+  </div>
+
+  <!-- Donation Card -->
+  <section class="mx-auto mt-7 max-w-5xl rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <h3 class="font-bold text-slate-900 text-sm md:text-base">Help Us Keep Server Free</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Form bharne me time bacha? Server maintenance ke liye chhota support karein.</p>
+      </div>
+      <button id="open-donation-btn" type="button" 
+        class="shrink-0 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold px-4 py-2.5 text-xs hover:bg-indigo-100 transition flex items-center gap-1.5">
+        ☕ Support / Donate ₹10
+      </button>
+    </div>
+  </section>
+
+  <!-- Bottom Ad Space -->
+  <div class="mt-7 flex min-h-[60px] items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white text-xs text-slate-400">
+    Advertisement space
+  </div>
+</main>
+
+<!-- OWNER / CREATOR VIP MODAL -->
+<div id="owner-vip-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-md hidden">
+  <div class="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl border-2 border-amber-400 text-center relative overflow-hidden">
+    <div class="text-4xl mb-2">👑</div>
+    <span class="inline-block rounded-full bg-amber-100 text-amber-800 text-xs font-black uppercase px-3 py-1 mb-2 tracking-wide">
+      Owner Verified
+    </span>
+    <h3 class="text-xl font-black text-slate-900">Welcome, Creator!</h3>
+    <p class="text-xs text-slate-500 mt-1">Aapka secret bypass activate ho gaya hai.</p>
+
+    <div class="my-4 rounded-2xl bg-amber-50/70 border border-amber-200 p-4 text-left">
+      <p class="text-xs font-bold text-amber-900">Privileges Unlocked:</p>
+      <ul class="text-[11px] text-amber-800 mt-1.5 space-y-1">
+        <li>✓ Zero Limits & No Payment Wall</li>
+        <li>✓ Unlimited Photo & Signature Resizing</li>
+        <li>✓ Lifetime Free Device Access</li>
+      </ul>
+    </div>
+
+    <button id="confirm-owner-btn" type="button" 
+      class="w-full rounded-xl bg-amber-500 hover:bg-amber-600 py-3.5 text-sm font-bold text-white shadow-md transition">
+      Activate VIP Owner Pass ✓
+    </button>
+  </div>
+</div>
+
+<!-- PAYWALL MODAL -->
+<div id="paywall-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm hidden">
+  <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-slate-100 text-center relative overflow-hidden">
+    
+    <div class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-bold text-amber-700 mb-2">
+      ⚡ Daily Free Limit Reached
+    </div>
+
+    <h3 class="text-xl font-extrabold text-slate-900">Unlock More Downloads</h3>
+    <p class="text-xs text-slate-500 mt-1">Aapke 4 free credits aaj ke liye khatam ho chuke hain.</p>
+
+    <!-- Reset Countdown Box -->
+    <div class="my-3 rounded-xl bg-slate-100 p-2 text-xs font-medium text-slate-600">
+      Agla free quota reset hoga: <span id="reset-in-timer" class="font-bold text-indigo-600">--:--</span>
+    </div>
+
+    <!-- Step 1: Plan Selection -->
+    <div id="pay-initial-step" class="space-y-3 mt-4">
+      
+      <!-- Option 1: Standard Plan (₹19 or ₹29) -->
+      <div id="plan-single-card" class="rounded-2xl border-2 border-indigo-600 bg-indigo-50/50 p-4 text-left cursor-pointer hover:border-indigo-700 transition" onclick="selectPlan('single')">
+        <div class="flex items-center justify-between">
+          <div>
+            <span id="single-plan-title" class="text-sm font-bold text-slate-800">Quick Exam Pass</span>
+            <p class="text-[11px] text-slate-500 mt-0.5">Instant unlimited for today</p>
+          </div>
+          <span id="single-plan-price" class="text-2xl font-black text-indigo-700">₹19</span>
+        </div>
+      </div>
+
+      <!-- Option 2: Monthly Plan (₹129 for 30 Days) -->
+      <div id="plan-month-card" class="rounded-2xl border border-slate-200 bg-white p-4 text-left cursor-pointer hover:border-indigo-400 transition" onclick="selectPlan('monthly')">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-sm font-bold text-slate-800">1 Month Cyber/Pro Pass</span>
+              <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Best Value</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">Full 30 Days Unlimited Downloads</p>
+          </div>
+          <span class="text-2xl font-black text-slate-900">₹129</span>
+        </div>
+      </div>
+
+      <button id="show-qr-btn" type="button" 
+        class="w-full rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-md hover:bg-indigo-700 transition mt-2">
+        Pay <span id="btn-pay-amount">₹19</span> via UPI QR Code →
+      </button>
+    </div>
+
+    <!-- Step 2: Hidden QR View -->
+    <div id="pay-qr-step" class="hidden">
+      <div class="mb-3 flex items-center justify-center gap-2 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 py-1.5 rounded-xl">
+        <span>⏳ QR Code valid for:</span>
+        <span id="countdown-timer" class="font-mono font-bold text-sm">02:00</span>
+      </div>
+
+      <div class="flex justify-center my-2">
+        <div class="p-2 border-2 border-indigo-200 rounded-2xl bg-white shadow-inner">
+          <img id="dynamic-qr-img" src="" alt="UPI QR Code" class="h-36 w-36 rounded-lg">
+        </div>
+      </div>
+
+      <p class="text-[11px] text-slate-400">Scan via PhonePe, Google Pay, Paytm, or BHIM</p>
+      
+      <button id="paid-verify-button" type="button" 
+        class="mt-3 w-full rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition">
+        I Have Completed Payment ✓
+      </button>
+
+      <button id="back-to-plans-btn" type="button" class="mt-2 text-xs text-indigo-600 font-semibold">
+        ← Change Plan
+      </button>
+    </div>
+
+    <button id="close-modal-btn" type="button" class="mt-3 text-xs text-slate-400 hover:text-slate-600">
+      Cancel & Wait for 24h Reset
+    </button>
+  </div>
+</div>
+
+<!-- DONATION MODAL -->
+<div id="donation-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/75 p-4 backdrop-blur-sm hidden">
+  <div class="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl border border-slate-100 text-center">
+    <div class="text-3xl mb-1">☕</div>
+    <h3 class="text-lg font-bold text-slate-900">Support ExamReady</h3>
+    <p class="text-xs text-slate-500 mt-1">Ek chai ke barabar contribution server online rakhta hai.</p>
+
+    <div class="flex justify-center my-3">
+      <div class="p-2 border border-slate-200 rounded-2xl bg-white shadow-sm">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa=6351695089@fam%26pn=ExamReadySupport%26am=10%26cu=INR" 
+             alt="Donation QR" class="h-32 w-32 rounded-lg">
+      </div>
+    </div>
+    
+    <p class="text-xs font-semibold text-indigo-700 bg-indigo-50 py-1.5 rounded-lg select-all">
+      UPI: 6351695089@fam
+    </p>
+
+    <button id="close-donation-btn" type="button" class="mt-4 w-full rounded-xl bg-slate-100 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition">
+      Done / Back
+    </button>
+  </div>
+</div>
+
+<footer class="mt-10 border-t border-slate-200 bg-white">
+  <div class="mx-auto max-w-6xl px-4 py-5 text-center text-xs text-slate-500">
+    ExamReady · Privacy First Image Compression · Automatic 24h Reset
+  </div>
+</footer>
+
+<script>
+"use strict";
+
+const MAX_FREE_USAGE = 4;
+const RESET_HOURS = 24;
+const RESET_MS = RESET_HOURS * 60 * 60 * 1000;
+const MAX_FILE_BYTES = 20 * 1024 * 1024;
+
+const PRESETS = {
+  passport: { width: 350, height: 450, minKB: 20, maxKB: 50, label: "Passport Photo", filename: "examready-passport.jpg" },
+  signature: { width: 300, height: 120, minKB: 10, maxKB: 20, label: "Signature", filename: "examready-signature.jpg" }
+};
+
+const $ = id => document.getElementById(id);
+
+const el = {
+  input: $("file-input"),
+  zone: $("drop-zone"),
+  sourceInfo: $("source-info"),
+  sourceName: $("source-name"),
+  sourceMeta: $("source-meta"),
+  processButton: $("process-button"),
+  processLabel: $("process-label"),
+  spinner: $("process-spinner"),
+  emptyPreview: $("empty-preview"),
+  resultPanel: $("result-panel"),
+  errorPanel: $("error-panel"),
+  originalPreview: $("original-preview"),
+  resultPreview: $("result-preview"),
+  originalDetails: $("original-details"),
+  resultDetails: $("result-details"),
+  statusCard: $("status-card"),
+  statusIcon: $("status-icon"),
+  statusTitle: $("status-title"),
+  statusMessage: $("status-message"),
+  download: $("download-button"),
+  paywallModal: $("paywall-modal"),
+  donationModal: $("donation-modal"),
+  creditCount: $("credit-count"),
+  countdownTimer: $("countdown-timer"),
+  payInitialStep: $("pay-initial-step"),
+  payQrStep: $("pay-qr-step"),
+  resetInTimer: $("reset-in-timer"),
+  dynamicQrImg: $("dynamic-qr-img")
+};
+
+let mode = "passport";
+let selectedFile = null;
+let originalURL = null;
+let resultURL = null;
+let currentBlob = null;
+let isProcessing = false;
+let operationId = 0;
+let countdownInterval = null;
+let selectedPlanType = 'single';
+
+// --- RELIABLE 10-CLICK OWNER / ADMIN ENGINE ---
+let adminClicks = 0;
+let clickResetTimer = null;
+
+const adminTrigger = $("admin-secret-logo");
+
+adminTrigger.addEventListener("click", function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  adminClicks++;
+
+  // Visual tap feedback
+  adminTrigger.style.transform = "scale(0.92)";
+  setTimeout(() => { adminTrigger.style.transform = "scale(1)"; }, 100);
+
+  clearTimeout(clickResetTimer);
+  clickResetTimer = setTimeout(() => {
+    adminClicks = 0;
+  }, 8000); // 8 seconds window
+
+  if (adminClicks >= 10) {
+    adminClicks = 0;
+    clearTimeout(clickResetTimer);
+    $("owner-vip-modal").classList.remove("hidden");
+  }
+});
+
+$("confirm-owner-btn").addEventListener("click", () => {
+  localStorage.setItem("examready_is_admin", "true");
+  localStorage.setItem("examready_is_pro", "true");
+  $("owner-vip-modal").classList.add("hidden");
+  updateStatusUI();
+  alert("Owner verified! Unlimited access is now permanently active on this browser.");
+});
+
+function isCreatorAdmin() {
+  return localStorage.getItem("examready_is_admin") === "true";
+}
+
+// 1. Subscription & 24h Reset Engine
+function checkExpiryAndReset() {
+  if (isCreatorAdmin()) return;
+
+  const now = Date.now();
+
+  // Check 30-Day Monthly Subscription
+  const monthlyExpiry = localStorage.getItem("examready_monthly_expiry");
+  if (monthlyExpiry) {
+    if (now > parseInt(monthlyExpiry, 10)) {
+      localStorage.removeItem("examready_monthly_expiry");
+      localStorage.removeItem("examready_is_pro");
+    } else {
+      return;
+    }
+  }
+
+  // Check 24-Hour Free Credits Reset
+  const lastReset = localStorage.getItem("examready_last_reset");
+  if (!lastReset) {
+    localStorage.setItem("examready_last_reset", now.toString());
+    localStorage.setItem("examready_usage_count", "0");
+  } else if (now - parseInt(lastReset, 10) >= RESET_MS) {
+    localStorage.setItem("examready_usage_count", "0");
+    localStorage.setItem("examready_last_reset", now.toString());
+  }
+}
+
+function isProActive() {
+  if (isCreatorAdmin()) {
+    return { active: true, type: "admin" };
+  }
+
+  checkExpiryAndReset();
+  const monthlyExpiry = localStorage.getItem("examready_monthly_expiry");
+  if (monthlyExpiry && Date.now() <= parseInt(monthlyExpiry, 10)) {
+    return { active: true, type: "monthly" };
+  }
+  if (localStorage.getItem("examready_is_pro") === "true") {
+    return { active: true, type: "pass" };
+  }
+  return { active: false };
+}
+
+function getUsageCount() {
+  return parseInt(localStorage.getItem("examready_usage_count") || "0", 10);
+}
+
+function getTimeUntilReset() {
+  const lastReset = parseInt(localStorage.getItem("examready_last_reset") || Date.now().toString(), 10);
+  const elapsed = Date.now() - lastReset;
+  const remainingMs = Math.max(0, RESET_MS - elapsed);
+  
+  const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+  const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+  return `${hours}h ${minutes}m`;
+}
+
+function updateStatusUI() {
+  checkExpiryAndReset();
+  const pro = isProActive();
+
+  if (pro.active) {
+    if (pro.type === "admin") {
+      $("status-badge").className = "rounded-full border border-amber-300 bg-amber-50 px-3.5 py-1.5 text-xs font-bold text-amber-800 shadow-sm";
+      $("status-badge").innerHTML = "👑 Creator VIP (Unlimited Free)";
+    } else if (pro.type === "monthly") {
+      const exp = parseInt(localStorage.getItem("examready_monthly_expiry"), 10);
+      const daysLeft = Math.ceil((exp - Date.now()) / (1000 * 60 * 60 * 24));
+      $("status-badge").className = "rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-xs font-semibold text-emerald-700";
+      $("status-badge").innerHTML = `★ 1 Month Pass (${daysLeft} days left)`;
+    } else {
+      $("status-badge").className = "rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-xs font-semibold text-emerald-700";
+      $("status-badge").innerHTML = "★ Unlimited Pro Pass";
+    }
+    return;
+  }
+
+  const remaining = Math.max(0, MAX_FREE_USAGE - getUsageCount());
+  el.creditCount.textContent = remaining;
+  if (remaining === 0) {
+    $("status-badge").className = "rounded-full border border-rose-200 bg-rose-50 px-3.5 py-1.5 text-xs font-semibold text-rose-700";
+  } else {
+    $("status-badge").className = "rounded-full border border-indigo-200 bg-indigo-50 px-3.5 py-1.5 text-xs font-semibold text-indigo-700";
+  }
+}
+updateStatusUI();
+
+function getCurrentSinglePrice() {
+  const hasPaidOnce = localStorage.getItem("examready_paid_once") === "true";
+  return hasPaidOnce ? 29 : 19;
+}
+
+function selectPlan(type) {
+  selectedPlanType = type;
+  const singleCard = $("plan-single-card");
+  const monthCard = $("plan-month-card");
+  const price = getCurrentSinglePrice();
+
+  if (type === 'single') {
+    singleCard.className = "rounded-2xl border-2 border-indigo-600 bg-indigo-50/50 p-4 text-left cursor-pointer transition";
+    monthCard.className = "rounded-2xl border border-slate-200 bg-white p-4 text-left cursor-pointer hover:border-indigo-400 transition";
+    $("btn-pay-amount").textContent = `₹${price}`;
+  } else {
+    monthCard.className = "rounded-2xl border-2 border-indigo-600 bg-indigo-50/50 p-4 text-left cursor-pointer transition";
+    singleCard.className = "rounded-2xl border border-slate-200 bg-white p-4 text-left cursor-pointer hover:border-indigo-400 transition";
+    $("btn-pay-amount").textContent = `₹129`;
+  }
+}
+
+function showPaywall() {
+  checkExpiryAndReset();
+  const price = getCurrentSinglePrice();
+  $("single-plan-price").textContent = `₹${price}`;
+  $("single-plan-title").textContent = (price === 19) ? "Starter Exam Pass" : "Power Exam Pass";
+  $("reset-in-timer").textContent = getTimeUntilReset();
+
+  selectPlan('single');
+  el.payInitialStep.classList.remove("hidden");
+  el.payQrStep.classList.add("hidden");
+  el.paywallModal.classList.remove("hidden");
+}
+
+function startTimer(durationSeconds) {
+  clearInterval(countdownInterval);
+  let timer = durationSeconds;
+  
+  function updateDisplay() {
+    let minutes = Math.floor(timer / 60);
+    let seconds = timer % 60;
+    el.countdownTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  updateDisplay();
+  countdownInterval = setInterval(() => {
+    timer--;
+    if (timer < 0) {
+      timer = 120;
+    }
+    updateDisplay();
+  }, 1000);
+}
+
+$("show-qr-btn").addEventListener("click", () => {
+  const amount = (selectedPlanType === 'single') ? getCurrentSinglePrice() : 129;
+  const upiUrl = `upi://pay?pa=6351695089@fam%26pn=ExamReady%26am=${amount}%26cu=INR`;
+  el.dynamicQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUrl)}`;
+
+  el.payInitialStep.classList.add("hidden");
+  el.payQrStep.classList.remove("hidden");
+  startTimer(120);
+});
+
+$("back-to-plans-btn").addEventListener("click", () => {
+  clearInterval(countdownInterval);
+  el.payQrStep.classList.add("hidden");
+  el.payInitialStep.classList.remove("hidden");
+});
+
+$("close-modal-btn").addEventListener("click", () => {
+  el.paywallModal.classList.add("hidden");
+  clearInterval(countdownInterval);
+});
+
+$("paid-verify-button").addEventListener("click", () => {
+  const now = Date.now();
+
+  if (selectedPlanType === 'monthly') {
+    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+    localStorage.setItem("examready_monthly_expiry", (now + thirtyDaysMs).toString());
+  } else {
+    localStorage.setItem("examready_is_pro", "true");
+  }
+
+  localStorage.setItem("examready_paid_once", "true");
+  el.paywallModal.classList.add("hidden");
+  clearInterval(countdownInterval);
+  updateStatusUI();
+  triggerDirectDownload();
+});
+
+$("open-donation-btn").addEventListener("click", () => el.donationModal.classList.remove("hidden"));
+$("close-donation-btn").addEventListener("click", () => el.donationModal.classList.add("hidden"));
+
+function formatBytes(bytes) {
+  return bytes < 1024 ? `${bytes} bytes` : `${(bytes / 1024).toFixed(1)} KB`;
+}
+
+function getPreset() {
+  return PRESETS[mode];
+}
+
+function clearResult() {
+  if (resultURL) URL.revokeObjectURL(resultURL);
+  resultURL = null;
+  currentBlob = null;
+  el.resultPreview.removeAttribute("src");
+  el.resultPanel.classList.add("hidden");
+  el.emptyPreview.classList.remove("hidden");
+}
+
+function showError(message) {
+  el.errorPanel.textContent = message;
+  el.errorPanel.classList.remove("hidden");
+}
+
+function clearError() {
+  el.errorPanel.textContent = "";
+  el.errorPanel.classList.add("hidden");
+}
+
+function setProcessing(active) {
+  isProcessing = active;
+  el.processButton.disabled = active || !selectedFile;
+  el.spinner.classList.toggle("hidden", !active);
+  el.processLabel.textContent = active ? "Optimizing image…" : "Optimize Image";
+}
+
+function setMode(newMode) {
+  if (!PRESETS[newMode]) return;
+  mode = newMode;
+  operationId++;
+
+  const passport = mode === "passport";
+  $("passport-mode").className = passport
+    ? "rounded-2xl border-2 border-indigo-600 bg-indigo-50 p-4 text-left"
+    : "rounded-2xl border-2 border-slate-200 bg-white p-4 text-left hover:border-indigo-300";
+
+  $("signature-mode").className = !passport
+    ? "rounded-2xl border-2 border-indigo-600 bg-indigo-50 p-4 text-left"
+    : "rounded-2xl border-2 border-slate-200 bg-white p-4 text-left hover:border-indigo-300";
+
+  $("passport-check").classList.toggle("invisible", !passport);
+  $("signature-check").classList.toggle("hidden", passport);
+
+  clearResult();
+  clearError();
+  setProcessing(false);
+
+  if (selectedFile) {
+    el.sourceMeta.textContent = `${formatBytes(selectedFile.size)} · Output ${getPreset().width} × ${getPreset().height} px`;
+  }
+}
+
+$("passport-mode").addEventListener("click", () => setMode("passport"));
+$("signature-mode").addEventListener("click", () => setMode("signature"));
+
+function acceptFile(file) {
+  if (!file) return;
+  clearError();
+
+  const supportedTypes = ["image/jpeg", "image/png", "image/webp"];
+  if (!supportedTypes.includes(file.type)) {
+    showError("Unsupported file type. Please select a JPG, PNG or WebP image.");
+    return;
+  }
+
+  if (file.size > MAX_FILE_BYTES) {
+    showError("The image exceeds the 20 MB limit.");
+    return;
+  }
+
+  operationId++;
+  setProcessing(false);
+  clearResult();
+
+  if (originalURL) URL.revokeObjectURL(originalURL);
+  selectedFile = file;
+  originalURL = URL.createObjectURL(file);
+
+  el.sourceName.textContent = file.name;
+  el.sourceMeta.textContent = `${formatBytes(file.size)} · Output ${getPreset().width} × ${getPreset().height} px`;
+  el.sourceInfo.classList.remove("hidden");
+  el.originalPreview.src = originalURL;
+  el.originalDetails.textContent = formatBytes(file.size);
+  el.processButton.disabled = false;
+
+  const image = new Image();
+  image.onload = () => {
+    if (selectedFile !== file) return;
+    el.originalDetails.textContent = `${image.naturalWidth} × ${image.naturalHeight} px · ${formatBytes(file.size)}`;
+  };
+  image.src = originalURL;
+}
+
+el.input.addEventListener("change", e => acceptFile(e.target.files[0]));
+
+$("remove-file").addEventListener("click", () => {
+  selectedFile = null;
+  el.input.value = "";
+  el.sourceInfo.classList.add("hidden");
+  clearResult();
+  clearError();
+  setProcessing(false);
+});
+
+// Drag and drop
+["dragenter", "dragover"].forEach(name => {
+  el.zone.addEventListener(name, e => { e.preventDefault(); el.zone.classList.add("dragging"); });
+});
+["dragleave", "drop"].forEach(name => {
+  el.zone.addEventListener(name, e => { e.preventDefault(); el.zone.classList.remove("dragging"); });
+});
+el.zone.addEventListener("drop", e => acceptFile(e.dataTransfer?.files?.[0]));
+
+function drawImageToCanvas(image, width, height) {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d", { alpha: false });
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
+
+  const sw = image.naturalWidth;
+  const sh = image.naturalHeight;
+  const sourceRatio = sw / sh;
+  const targetRatio = width / height;
+
+  let cw = sw, ch = sh, cx = 0, cy = 0;
+  if (sourceRatio > targetRatio) {
+    cw = sh * targetRatio;
+    cx = (sw - cw) / 2;
+  } else {
+    ch = sw / targetRatio;
+    cy = (sh - ch) / 2;
+  }
+
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(image, cx, cy, cw, ch, 0, 0, width, height);
+  return canvas;
+}
+
+function canvasToBlob(canvas, quality) {
+  return new Promise(resolve => canvas.toBlob(blob => resolve(blob), "image/jpeg", quality));
+}
+
+async function findBestCompression(canvas, preset) {
+  const minBytes = preset.minKB * 1024;
+  const maxBytes = preset.maxKB * 1024;
+  let smallestBlob = null;
+  let smallestQuality = 0.1;
+
+  for (let step = 0; step <= 40; step++) {
+    const quality = Math.round((0.9 - step * 0.02) * 100) / 100;
+    const blob = await canvasToBlob(canvas, quality);
+
+    if (!smallestBlob || blob.size < smallestBlob.size) {
+      smallestBlob = blob;
+      smallestQuality = quality;
+    }
+
+    if (blob.size >= minBytes && blob.size <= maxBytes) {
+      return { blob, quality, compliant: true };
+    }
+  }
+
+  return { blob: smallestBlob, quality: smallestQuality, compliant: !!smallestBlob && smallestBlob.size >= minBytes && smallestBlob.size <= maxBytes };
+}
+
+function triggerDirectDownload() {
+  if (!currentBlob) return;
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(currentBlob);
+  a.download = getPreset().filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// Download Button
+el.download.addEventListener("click", () => {
+  checkExpiryAndReset();
+  const pro = isProActive();
+
+  if (pro.active) {
+    triggerDirectDownload();
+    return;
+  }
+
+  const currentUsage = getUsageCount();
+  if (currentUsage >= MAX_FREE_USAGE) {
+    showPaywall();
+  } else {
+    localStorage.setItem("examready_usage_count", (currentUsage + 1).toString());
+    updateStatusUI();
+    triggerDirectDownload();
+  }
+});
+
+// Process Button
+el.processButton.addEventListener("click", async () => {
+  if (!selectedFile || isProcessing) return;
+
+  checkExpiryAndReset();
+  const pro = isProActive();
+
+  if (!pro.active && getUsageCount() >= MAX_FREE_USAGE) {
+    showPaywall();
+    return;
+  }
+
+  const file = selectedFile;
+  const preset = getPreset();
+  const thisOperation = ++operationId;
+
+  clearError();
+  clearResult();
+  setProcessing(true);
+
+  let tempURL = null;
+  try {
+    tempURL = URL.createObjectURL(file);
+    const img = new Image();
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = () => reject(new Error("Unable to open image."));
+      img.src = tempURL;
+    });
+
+    if (thisOperation !== operationId) return;
+
+    const canvas = drawImageToCanvas(img, preset.width, preset.height);
+    const result = await findBestCompression(canvas, preset);
+
+    if (thisOperation !== operationId) return;
+
+    currentBlob = result.blob;
+    if (resultURL) URL.revokeObjectURL(resultURL);
+    resultURL = URL.createObjectURL(result.blob);
+
+    el.resultPreview.src = resultURL;
+    el.resultDetails.textContent = `${preset.width} × ${preset.height} px · ${formatBytes(result.blob.size)}`;
+    el.resultPanel.classList.remove("hidden");
+    el.emptyPreview.classList.add("hidden");
+
+    if (result.compliant) {
+      el.statusCard.className = "mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3";
+      el.statusIcon.textContent = "✓";
+      el.statusTitle.textContent = "Standard exam size achieved";
+      el.statusTitle.className = "text-sm font-bold text-emerald-800";
+      el.statusMessage.textContent = `${formatBytes(result.blob.size)} — Form ready.`;
+    } else {
+      el.statusCard.className = "mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3";
+      el.statusIcon.textContent = "!";
+      el.statusTitle.textContent = "Target file size not achieved";
+      el.statusTitle.className = "text-sm font-bold text-amber-800";
+      el.statusMessage.textContent = `Output is ${formatBytes(result.blob.size)}. Try another photo.`;
+    }
+
+  } catch (err) {
+    showError(err.message || "Failed to process image.");
+  } finally {
+    if (tempURL) URL.revokeObjectURL(tempURL);
+    if (thisOperation === operationId) setProcessing(false);
+  }
+});
+</script>
+
+</body>
+</html>
