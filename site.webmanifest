@@ -27,6 +27,17 @@
     {
       "src": "/apple-touch-icon.png",
       "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
@@ -37,14 +48,14 @@
       "short_name": "Passport",
       "description": "Compress photo to 20KB-50KB",
       "url": "/?mode=passport",
-      "icons": [{ "src": "/apple-touch-icon.png", "sizes": "180x180" }]
+      "icons": [{ "src": "/apple-touch-icon.png", "sizes": "192x192" }]
     },
     {
       "name": "Signature (10-20KB)",
       "short_name": "Signature",
       "description": "Compress signature to 10KB-20KB",
       "url": "/?mode=signature",
-      "icons": [{ "src": "/apple-touch-icon.png", "sizes": "180x180" }]
+      "icons": [{ "src": "/apple-touch-icon.png", "sizes": "192x192" }]
     }
   ]
 }
