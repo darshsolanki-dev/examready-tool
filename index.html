@@ -371,9 +371,60 @@
   </div>
 </div>
 
+<!-- PRIVACY POLICY MODAL -->
+<div id="privacy-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm hidden">
+  <div class="w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-slate-100 text-left relative">
+    <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+      <h3 class="text-xl font-bold text-slate-900">Privacy Policy</h3>
+      <button id="close-privacy-btn" type="button" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none">&times;</button>
+    </div>
+    
+    <div class="space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
+      <p class="text-slate-500 italic">Effective Date: October 2026</p>
+      <p>Welcome to <strong>Photo Compressor - Exam Ready</strong>. Your privacy is our highest priority.</p>
+
+      <div>
+        <h4 class="font-bold text-slate-800 text-sm mb-1">1. 100% Client-Side Processing</h4>
+        <p>All photo resizing, signature compression, and image processing happen entirely locally within your device's web browser using client-side JavaScript and HTML5 Canvas. <strong>Your photos, signatures, and documents are NEVER uploaded to our servers, stored in any database, or shared with third parties.</strong></p>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-slate-800 text-sm mb-1">2. Zero Personal Data Collection</h4>
+        <p>We do not collect names, phone numbers, email addresses, or any personally identifiable information (PII). No user account creation or sign-in is required to use this tool.</p>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-slate-800 text-sm mb-1">3. Local Device Storage</h4>
+        <p>The application only saves standard UI preferences and usage counters locally inside your device browser (using browser localStorage). This data remains strictly on your device.</p>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-slate-800 text-sm mb-1">4. Contact & Support</h4>
+        <p>For inquiries or technical questions regarding this policy, contact us at: <a href="mailto:darshsolanki55@gmail.com" class="text-indigo-600 underline font-semibold">darshsolanki55@gmail.com</a></p>
+      </div>
+    </div>
+
+    <div class="mt-6 border-t border-slate-200 pt-4 text-right">
+      <button id="close-privacy-btn-bottom" type="button" class="rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-indigo-700 transition">
+        I Understand & Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER WITH PRIVACY POLICY LINK -->
 <footer class="mt-10 border-t border-slate-200 bg-white">
-  <div class="mx-auto max-w-6xl px-4 py-5 text-center text-xs text-slate-500">
-    PhotoCompressor · Privacy First Image Compression · Automatic 24h Reset
+  <div class="mx-auto max-w-6xl px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+    <div>
+      PhotoCompressor · Privacy First Image Compression · Automatic 24h Reset
+    </div>
+    <div class="flex items-center gap-4">
+      <button id="open-privacy-btn" type="button" class="font-semibold text-indigo-600 hover:text-indigo-800 underline">
+        Privacy Policy
+      </button>
+      <span>·</span>
+      <span>© 2026 ExamReady</span>
+    </div>
   </div>
 </footer>
 
@@ -418,6 +469,7 @@ const el = {
   download: $("download-button"),
   paywallModal: $("paywall-modal"),
   donationModal: $("donation-modal"),
+  privacyModal: $("privacy-modal"),
   creditCount: $("credit-count"),
   countdownTimer: $("countdown-timer"),
   payInitialStep: $("pay-initial-step"),
@@ -440,6 +492,11 @@ let isProcessing = false;
 let operationId = 0;
 let countdownInterval = null;
 let selectedPlanType = 'single';
+
+// Privacy Modal Controls
+$("open-privacy-btn").addEventListener("click", () => el.privacyModal.classList.remove("hidden"));
+$("close-privacy-btn").addEventListener("click", () => el.privacyModal.classList.add("hidden"));
+$("close-privacy-btn-bottom").addEventListener("click", () => el.privacyModal.classList.add("hidden"));
 
 // URL Param Check for App Shortcuts (?mode=signature)
 const urlParams = new URLSearchParams(window.location.search);
