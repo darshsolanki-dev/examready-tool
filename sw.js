@@ -1,7 +1,8 @@
-const CACHE_NAME = 'photocompressor-v2';
+const CACHE_NAME = 'examready-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
+  '/privacy.html',
   '/site.webmanifest',
   '/favicon.ico',
   '/apple-touch-icon.png',
@@ -27,8 +28,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  
-  // External ad network URLs ko cache mat karein
+
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) {
     return;
@@ -38,9 +38,7 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then((cachedResponse) => {
       return (
         cachedResponse ||
-        fetch(event.request).catch(() => {
-          return caches.match('/');
-        })
+        fetch(event.request).catch(() => caches.match('/'))
       );
     })
   );
