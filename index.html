@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <meta name="theme-color" content="#4f46e5">
-  <title>Photo Compressor — Convert Photo MB to KB (20KB to 50KB) Free Online</title>
-  <meta name="description" content="Free online photo converter and photo compressor. Reduce photo size from MB to KB (20KB–50KB) and signature to 10–20 KB for Sarkari, SSC, UPSC exam forms. Instant, private, in-browser.">
-  <meta name="keywords" content="photo compressor, photo converter, photo mb to kb, image compressor mb to kb, photo 20kb to 50kb, resize photo to 20kb, ssc photo resizer, sarkari photo resizer">
+  <title>ExamReady — Photo Compressor, Image to PDF, PDF Tools | Free Online</title>
+  <meta name="description"
+    content="Free online photo compressor (20KB–50KB), image to PDF converter, PDF merge/split/compress, and PDF to image. Instant, private, in-browser tools for SSC, UPSC, Railway exam forms.">
+  <meta name="keywords"
+    content="photo compressor, photo converter, photo mb to kb, image to pdf, pdf merge, pdf split, pdf compress, pdf to image, ssc photo resizer, sarkari photo resizer, exam photo tool">
   <meta name="google-site-verification" content="0YcuwicVA8iD-HXQrXVZoGiYxso1DNrPqyInvMY0oc0" />
 
   <!-- Favicon & Brand Icons -->
@@ -20,1017 +23,2063 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
+        navigator.serviceWorker.register('/sw.js').catch(() => { });
       });
     }
   </script>
 
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <!-- PDF Libraries (deferred & preloaded for reliability) -->
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js" defer></script>
+  <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
 
   <style>
-    body { background: #f8fafc; }
-    .drop-zone { transition: .2s; }
-    .drop-zone.dragging {
-      border-color: #4f46e5;
-      background: #eef2ff;
-      transform: scale(1.01);
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #eef2ff;
+      --primary-dark: #3730a3;
+      --emerald: #059669;
+      --emerald-light: #ecfdf5;
+      --rose: #e11d48;
+      --rose-light: #fff1f2;
+      --amber: #d97706;
+      --amber-light: #fffbeb;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-300: #cbd5e1;
+      --slate-400: #94a3b8;
+      --slate-500: #64748b;
+      --slate-600: #475569;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --radius-xs: 8px;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+      --transition: 0.2s ease;
     }
-    .spinner {
-      width: 22px;
-      height: 22px;
-      border: 3px solid #c7d2fe;
-      border-top-color: #4f46e5;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--slate-50);
+      color: var(--slate-800);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+    @media (min-width: 640px) { .container { padding: 0 24px; } }
+    .hidden { display: none !important; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+    .select-none { user-select: none; -webkit-user-select: none; }
+    .header { background: white; border-bottom: 1px solid var(--slate-200); position: sticky; top: 0; z-index: 40; }
+    .header-inner { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; gap: 12px; }
+    .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: transform 0.15s ease; }
+    .logo-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; box-shadow: var(--shadow-sm); flex-shrink: 0; }
+    .logo-text { font-size: 17px; font-weight: 800; color: var(--slate-900); line-height: 1.2; }
+    .logo-text span { color: var(--primary); }
+    .logo-sub { font-size: 11px; color: var(--slate-500); line-height: 1.2; }
+    .status-badge { border-radius: 20px; padding: 6px 14px; font-size: 11px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+    .status-badge.free { background: var(--primary-light); color: var(--primary); border: 1px solid #c7d2fe; }
+    .status-badge.pro { background: var(--emerald-light); color: var(--emerald); border: 1px solid #a7f3d0; }
+    .status-badge.admin { background: var(--amber-light); color: #92400e; border: 1px solid #fde68a; }
+    .status-badge.exhausted { background: var(--rose-light); color: var(--rose); border: 1px solid #fecdd3; }
+    .nav-tabs { background: white; border-bottom: 1px solid var(--slate-200); overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .nav-tabs-inner { display: flex; gap: 2px; padding: 8px 0 0; min-width: max-content; }
+    .nav-tab { padding: 10px 16px; font-size: 13px; font-weight: 600; color: var(--slate-500); background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; transition: var(--transition); display: flex; align-items: center; gap: 6px; }
+    .nav-tab:hover { color: var(--primary); background: var(--primary-light); }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); }
+    .main { padding: 24px 0 40px; }
+    .tool-section { display: none; }
+    .tool-section.active { display: block; }
+    .section-header { text-align: center; margin-bottom: 24px; }
+    .section-badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 20px; background: var(--primary-light); padding: 6px 14px; font-size: 11px; font-weight: 600; color: var(--primary); margin-bottom: 12px; }
+    .section-title { font-size: 28px; font-weight: 800; color: var(--slate-900); line-height: 1.2; letter-spacing: -0.02em; }
+    .section-title span { color: var(--primary); }
+    .section-desc { margin-top: 12px; font-size: 14px; color: var(--slate-600); max-width: 600px; margin-left: auto; margin-right: auto; }
+    @media (min-width: 640px) { .section-title { font-size: 40px; } }
+    .card { background: white; border: 1px solid var(--slate-200); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-sm); }
+    @media (min-width: 640px) { .card { padding: 28px; } }
+    .card-title { font-size: 17px; font-weight: 700; color: var(--slate-900); }
+    .card-desc { font-size: 13px; color: var(--slate-500); margin-top: 4px; margin-bottom: 20px; }
+    .grid-2 { display: grid; gap: 20px; }
+    @media (min-width: 1024px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+    .presets { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 600px; margin: 0 auto 24px; }
+    .preset-btn { border-radius: var(--radius); padding: 16px; text-align: left; cursor: pointer; border: 2px solid var(--slate-200); background: white; transition: var(--transition); }
+    .preset-btn.active { border-color: var(--primary); background: var(--primary-light); }
+    .preset-btn-top { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .preset-btn-check { font-weight: 700; color: var(--primary); visibility: hidden; }
+    .preset-btn.active .preset-btn-check { visibility: visible; }
+    .preset-btn-title { font-weight: 700; font-size: 14px; color: var(--slate-900); }
+    .preset-btn-sub { font-size: 12px; color: var(--slate-600); margin-top: 4px; }
+    .drop-zone { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 240px; border: 2px dashed var(--slate-300); border-radius: var(--radius); background: var(--slate-50); padding: 32px 20px; text-align: center; cursor: pointer; transition: var(--transition); }
+    .drop-zone:hover { border-color: #818cf8; background: rgba(238, 242, 255, 0.5); }
+    .drop-zone.dragging { border-color: var(--primary); background: var(--primary-light); transform: scale(1.01); }
+    .drop-zone-icon { width: 56px; height: 56px; border-radius: var(--radius); background: #e0e7ff; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 16px; }
+    .drop-zone-title { font-weight: 700; color: var(--slate-900); font-size: 14px; }
+    .drop-zone-btn { margin-top: 16px; padding: 10px 20px; border-radius: var(--radius-sm); background: var(--primary); color: white; font-size: 13px; font-weight: 600; border: none; cursor: pointer; }
+    .drop-zone-hint { margin-top: 12px; font-size: 11px; color: var(--slate-400); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: var(--transition); width: 100%; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+    .btn-emerald { background: var(--emerald); color: white; }
+    .btn-emerald:hover:not(:disabled) { background: #047857; }
+    .btn-outline { background: white; color: var(--slate-700); border: 1px solid var(--slate-300); }
+    .btn-sm { padding: 10px 16px; font-size: 13px; }
+    .btn-xs { padding: 8px 12px; font-size: 12px; }
+    .spinner { width: 20px; height: 20px; border: 3px solid #c7d2fe; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .preview-image {
-      max-height: 280px;
-      max-width: 100%;
-      object-fit: contain;
-    }
-    #admin-secret-logo {
-      transition: transform 0.15s ease-in-out;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
+    .file-info { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border-radius: var(--radius-sm); background: var(--slate-50); margin-top: 16px; }
+    .file-info-text { min-width: 0; }
+    .file-info-name { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-info-meta { font-size: 11px; color: var(--slate-500); margin-top: 4px; }
+    .file-info-remove { font-size: 13px; font-weight: 600; color: var(--rose); background: none; border: none; cursor: pointer; padding: 8px 12px; border-radius: var(--radius-xs); flex-shrink: 0; }
+    .preview-image { max-height: 280px; max-width: 100%; object-fit: contain; }
+    .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .preview-box { border-radius: var(--radius-sm); border: 1px solid var(--slate-200); padding: 12px; text-align: center; }
+    .preview-box.success { border-color: #a7f3d0; background: rgba(236, 253, 245, 0.3); }
+    .preview-box-label { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--slate-500); margin-bottom: 12px; }
+    .preview-box.success .preview-box-label { color: var(--emerald); }
+    .preview-box-img { height: 140px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: var(--radius-xs); background: var(--slate-50); }
+    .preview-box.success .preview-box-img { background: white; }
+    .preview-box-meta { font-size: 11px; color: var(--slate-500); margin-top: 8px; }
+    .preview-box.success .preview-box-meta { color: var(--emerald); font-weight: 600; }
+    .status-card { margin-top: 16px; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--slate-200); display: flex; align-items: flex-start; gap: 10px; }
+    .status-card.success { border-color: #a7f3d0; background: var(--emerald-light); }
+    .status-card.warning { border-color: #fde68a; background: var(--amber-light); }
+    .status-card-icon { font-size: 18px; flex-shrink: 0; }
+    .status-card-title { font-size: 13px; font-weight: 700; }
+    .status-card-msg { font-size: 11px; color: var(--slate-600); margin-top: 2px; }
+    .status-card.success .status-card-title { color: #065f46; }
+    .status-card.warning .status-card-title { color: #92400e; }
+    .error-panel { margin-top: 16px; padding: 16px; border-radius: var(--radius-sm); border: 1px solid #fecdd3; background: var(--rose-light); color: #9f1239; font-size: 13px; }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 240px; border-radius: var(--radius); border: 1px solid var(--slate-200); background: var(--slate-50); text-align: center; padding: 20px; }
+    .empty-state-icon { font-size: 40px; color: var(--slate-300); }
+    .empty-state-title { font-size: 14px; font-weight: 600; color: var(--slate-600); margin-top: 12px; }
+    .empty-state-desc { font-size: 13px; color: var(--slate-400); margin-top: 4px; }
+    .ad-container { margin: 24px 0; border-radius: var(--radius-sm); border: 1px solid var(--slate-200); background: white; padding: 8px; box-shadow: var(--shadow-sm); text-align: center; overflow: hidden; max-width: 100%; }
+    .donation-card { border-radius: var(--radius); border: 1px solid var(--slate-200); background: white; padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+    @media (min-width: 640px) { .donation-card { flex-direction: row; align-items: center; justify-content: space-between; } }
+    .donation-title { font-weight: 700; font-size: 14px; color: var(--slate-900); }
+    .donation-desc { font-size: 12px; color: var(--slate-500); margin-top: 2px; }
+    .donation-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: var(--radius-sm); background: var(--primary-light); border: 1px solid #c7d2fe; color: var(--primary); font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+    .modal-overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.8); padding: 16px; backdrop-filter: blur(8px); }
+    .modal-content { width: 100%; max-width: 420px; border-radius: 24px; background: white; padding: 24px; box-shadow: var(--shadow-lg); text-align: center; position: relative; max-height: 90vh; overflow-y: auto; }
+    .modal-content.wide { max-width: 640px; text-align: left; }
+    .modal-close-x { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 22px; color: var(--slate-400); cursor: pointer; }
+    .plan-card { border-radius: var(--radius); padding: 16px; text-align: left; cursor: pointer; transition: var(--transition); border: 2px solid var(--slate-200); background: white; }
+    .plan-card.selected { border-color: var(--primary); background: rgba(238, 242, 255, 0.5); }
+    .plan-card-row { display: flex; align-items: center; justify-content: space-between; }
+    .plan-card-title { font-size: 13px; font-weight: 700; color: var(--slate-800); }
+    .plan-card-sub { font-size: 11px; color: var(--slate-500); margin-top: 2px; }
+    .plan-card-price { font-size: 24px; font-weight: 900; }
+    .qr-frame { padding: 8px; border: 2px solid #c7d2fe; border-radius: var(--radius); background: white; display: inline-block; }
+    .qr-frame img { width: 144px; height: 144px; border-radius: var(--radius-xs); display: block; }
+    .utr-input { width: 100%; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--slate-300); font-size: 14px; font-weight: 700; text-align: center; letter-spacing: 3px; color: var(--slate-900); }
+    .footer { border-top: 1px solid var(--slate-200); background: white; margin-top: 40px; }
+    .footer-inner { display: flex; flex-direction: column; gap: 12px; padding: 20px 0; font-size: 12px; color: var(--slate-500); text-align: center; }
+    @media (min-width: 640px) { .footer-inner { flex-direction: row; justify-content: space-between; align-items: center; } }
+    .footer-link { font-weight: 600; color: var(--primary); background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 12px; }
+    .pdf-file-list { list-style: none; padding: 0; }
+    .pdf-file-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--radius-xs); border: 1px solid var(--slate-200); background: white; margin-bottom: 8px; }
+    .pdf-file-grip { cursor: grab; color: var(--slate-400); font-size: 16px; flex-shrink: 0; }
+    .pdf-file-info { flex: 1; min-width: 0; }
+    .pdf-file-name { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pdf-file-size { font-size: 11px; color: var(--slate-500); }
+    .pdf-file-remove { background: none; border: none; cursor: pointer; color: var(--slate-400); font-size: 18px; padding: 4px; }
+    .img-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 16px; }
+    .img-preview-item { position: relative; border-radius: var(--radius-xs); overflow: hidden; border: 2px solid var(--slate-200); aspect-ratio: 1; background: var(--slate-50); }
+    .img-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+    .img-preview-item .img-remove-btn { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; background: rgba(0, 0, 0, 0.6); color: white; border: none; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+    .img-preview-item .img-order { position: absolute; bottom: 4px; left: 4px; font-size: 10px; font-weight: 700; color: white; background: rgba(0, 0, 0, 0.5); padding: 2px 6px; border-radius: 4px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--slate-700); margin-bottom: 6px; }
+    .form-select, .form-input { width: 100%; padding: 10px 12px; border-radius: var(--radius-xs); border: 1px solid var(--slate-300); font-size: 13px; color: var(--slate-900); background: white; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .progress-bar { height: 6px; border-radius: 3px; background: var(--slate-200); overflow: hidden; margin-top: 12px; }
+    .progress-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #818cf8); transition: width 0.3s ease; }
+    .result-downloads { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 16px; }
+    .result-download-item { border-radius: var(--radius-xs); border: 1px solid var(--slate-200); overflow: hidden; background: white; }
+    .result-download-item img { width: 100%; display: block; }
+    .result-download-item-footer { padding: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; border-top: 1px solid var(--slate-200); }
+    .result-download-btn { background: var(--primary); color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 10px; font-weight: 600; cursor: pointer; }
+    .warning-box { padding: 12px 16px; border-radius: var(--radius-xs); border: 1px solid #fde68a; background: var(--amber-light); font-size: 12px; color: #92400e; margin-top: 12px; }
+    .info-box { padding: 12px 16px; border-radius: var(--radius-xs); border: 1px solid #bfdbfe; background: #eff6ff; font-size: 12px; color: #1e40af; margin-top: 12px; }
   </style>
 </head>
 
-<body class="min-h-screen font-sans text-slate-800 antialiased relative">
+<body>
 
-<header class="border-b border-slate-200 bg-white">
-  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-    <!-- Secret 10-tap Logo -->
-    <div id="admin-secret-logo" class="flex items-center gap-3 select-none cursor-pointer">
-      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-xl font-bold text-white shadow-sm">P</div>
-      <div>
-        <div class="text-lg font-extrabold text-slate-900 leading-tight">Photo<span class="text-indigo-600">Compressor</span></div>
-        <div class="text-[11px] text-slate-500">Photo Converter · MB to KB (20KB–50KB)</div>
-      </div>
-    </div>
-    
-    <!-- Dynamic Plan / Free Badge -->
-    <div id="status-badge" class="rounded-full border border-indigo-200 bg-indigo-50 px-3.5 py-1.5 text-xs font-semibold text-indigo-700">
-      Free: <span id="credit-count" class="font-bold">4</span> left (24h Quota)
-    </div>
-  </div>
-</header>
-
-<main class="mx-auto max-w-6xl px-4 py-7 sm:px-6 sm:py-10">
-
-  <!-- Top Ad Space: Banner 728x90 -->
-  <div class="mb-7 flex min-h-[90px] items-center justify-center overflow-x-auto rounded-xl border border-slate-200 bg-white p-2 shadow-sm text-center">
-    <script>
-      atOptions = {
-        'key' : '4b66fc1eecc30745a6dedf9e10a8cda7',
-        'format' : 'iframe',
-        'height' : 90,
-        'width' : 728,
-        'params' : {}
-      };
-    </script>
-    <script src="https://bauval.org/22/4b66fc1eecc30745a6dedf9e10a8cda7"></script>
-  </div>
-
-  <section class="mb-8 text-center">
-    <div class="mb-3 inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3.5 py-1.5 text-xs font-semibold text-indigo-700">
-      <span>✓</span> 100% Client-Side Processing · SSC, Railway, UPSC, Police Ready
-    </div>
-    <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
-      Your exam photo, <span class="text-indigo-600">ready to upload.</span>
-    </h1>
-    <p class="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-      Instant photo (20–50 KB) & signature (10–20 KB) compression without downloading apps.
-    </p>
-  </section>
-
-  <!-- Preset Selection -->
-  <section class="mx-auto mb-6 grid max-w-3xl grid-cols-2 gap-3">
-    <button id="passport-mode" type="button"
-      class="rounded-2xl border-2 border-indigo-600 bg-indigo-50 p-4 text-left">
-      <div class="mb-2 flex justify-between">
-        <span class="text-2xl">🪪</span>
-        <span id="passport-check" class="font-bold text-indigo-600">✓</span>
-      </div>
-      <div class="font-bold text-slate-900">Passport Photo</div>
-      <div class="mt-1 text-xs text-slate-600">350 × 450 px · 20–50 KB</div>
-    </button>
-
-    <button id="signature-mode" type="button"
-      class="rounded-2xl border-2 border-slate-200 bg-white p-4 text-left hover:border-indigo-300">
-      <div class="mb-2 flex justify-between">
-        <span class="text-2xl">✍️</span>
-        <span id="signature-check" class="hidden font-bold text-indigo-600">✓</span>
-      </div>
-      <div class="font-bold text-slate-900">Signature</div>
-      <div class="mt-1 text-xs text-slate-600">300 × 120 px · 10–20 KB</div>
-    </button>
-  </section>
-
-  <div class="mx-auto grid max-w-5xl gap-6 lg:grid-cols-2">
-
-    <!-- Upload Box -->
-    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-      <h2 class="text-lg font-bold text-slate-900">1. Select Image</h2>
-      <p class="mt-1 mb-5 text-sm text-slate-500">Pick image from your gallery or desktop.</p>
-
-      <label id="drop-zone" for="file-input"
-        class="drop-zone flex min-h-64 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center hover:border-indigo-400 hover:bg-indigo-50/50">
-        <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-100 text-3xl text-indigo-600">↑</div>
-        <span class="font-bold text-slate-900">Choose Image or Drop here</span>
-        <span class="mt-4 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white">Browse File</span>
-        <span class="mt-3 text-xs text-slate-400">JPG, PNG or WebP · Max 20 MB</span>
-      </label>
-
-      <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp" class="sr-only">
-
-      <div id="source-info" class="mt-4 hidden rounded-xl bg-slate-50 p-3">
-        <div class="flex items-center justify-between gap-3">
-          <div class="min-w-0">
-            <p id="source-name" class="truncate text-sm font-semibold"></p>
-            <p id="source-meta" class="mt-1 text-xs text-slate-500"></p>
-          </div>
-          <button id="remove-file" type="button" class="rounded-lg px-3 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50">Remove</button>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container header-inner">
+      <div id="admin-secret-logo" class="logo select-none">
+        <div class="logo-icon">E</div>
+        <div>
+          <div class="logo-text">Exam<span>Ready</span></div>
+          <div class="logo-sub">Photo · PDF · Exam Tools</div>
         </div>
       </div>
+      <div id="status-badge" class="status-badge free">
+        Free: <span id="credit-count">4</span> left (24h)
+      </div>
+    </div>
+  </header>
 
-      <button id="process-button" type="button" disabled
-        class="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3.5 font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300">
-        <span id="process-spinner" class="spinner hidden"></span>
-        <span id="process-label">Optimize Image</span>
+  <!-- NAVIGATION TABS -->
+  <nav class="nav-tabs">
+    <div class="container">
+      <div class="nav-tabs-inner">
+        <button class="nav-tab active" data-tab="compressor" type="button">
+          <span>🖼️</span> Photo Compressor
+        </button>
+        <button class="nav-tab" data-tab="img2pdf" type="button">
+          <span>📄</span> Image to PDF
+        </button>
+        <button class="nav-tab" data-tab="pdftool" type="button">
+          <span>🔧</span> PDF Toolkit
+        </button>
+        <button class="nav-tab" data-tab="pdf2img" type="button">
+          <span>🖼️</span> PDF to Image
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="container">
+
+      <!-- Top Ad 728x90 -->
+      <div class="ad-container" id="ad-top">
+        <script>
+          atOptions = {
+            'key': '4b66fc1eecc30745a6dedf9e10a8cda7',
+            'format': 'iframe',
+            'height': 90,
+            'width': 728,
+            'params': {}
+          };
+        </script>
+        <script src="https://bauval.org/22/4b66fc1eecc30745a6dedf9e10a8cda7"></script>
+      </div>
+
+      <!-- ==================== TOOL 1: PHOTO COMPRESSOR ==================== -->
+      <section id="tool-compressor" class="tool-section active">
+        <div class="section-header">
+          <div class="section-badge">✓ 100% Client-Side · SSC, Railway, UPSC, Police Ready</div>
+          <h1 class="section-title">Your exam photo, <span>ready to upload.</span></h1>
+          <p class="section-desc">
+            Instant photo (20–50 KB) & signature (10–20 KB) compression without downloading apps.
+          </p>
+        </div>
+
+        <div class="presets">
+          <button id="passport-mode" type="button" class="preset-btn active">
+            <div class="preset-btn-top">
+              <span>🪪</span>
+              <span class="preset-btn-check" id="passport-check">✓</span>
+            </div>
+            <div class="preset-btn-title">Passport Photo</div>
+            <div class="preset-btn-sub">350 × 450 px · 20–50 KB</div>
+          </button>
+          <button id="signature-mode" type="button" class="preset-btn">
+            <div class="preset-btn-top">
+              <span>✍️</span>
+              <span class="preset-btn-check" id="signature-check">✓</span>
+            </div>
+            <div class="preset-btn-title">Signature</div>
+            <div class="preset-btn-sub">300 × 120 px · 10–20 KB</div>
+          </button>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h2 class="card-title">1. Select Image</h2>
+            <p class="card-desc">Pick image from your gallery or desktop.</p>
+
+            <label id="drop-zone" for="file-input" class="drop-zone">
+              <div class="drop-zone-icon">↑</div>
+              <span class="drop-zone-title">Choose Image or Drop here</span>
+              <span class="drop-zone-btn">Browse File</span>
+              <span class="drop-zone-hint">JPG, PNG or WebP · Max 20 MB</span>
+            </label>
+            <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp" class="sr-only">
+
+            <div id="source-info" class="file-info hidden">
+              <div class="file-info-text">
+                <p id="source-name" class="file-info-name"></p>
+                <p id="source-meta" class="file-info-meta"></p>
+              </div>
+              <button id="remove-file" type="button" class="file-info-remove">Remove</button>
+            </div>
+
+            <button id="process-button" type="button" disabled class="btn btn-primary" style="margin-top:20px">
+              <span id="process-spinner" class="spinner hidden"></span>
+              <span id="process-label">Optimize Image</span>
+            </button>
+          </div>
+
+          <div class="card">
+            <h2 class="card-title">2. Download output</h2>
+            <p class="card-desc">Check size before downloading.</p>
+
+            <div id="empty-preview" class="empty-state">
+              <div class="empty-state-icon">▧</div>
+              <p class="empty-state-title">Output will appear here</p>
+              <p class="empty-state-desc">Upload your file to test.</p>
+            </div>
+
+            <div id="result-panel" class="hidden">
+              <div class="preview-grid">
+                <div class="preview-box">
+                  <p class="preview-box-label">Original</p>
+                  <div class="preview-box-img">
+                    <img id="original-preview" class="preview-image" alt="Original">
+                  </div>
+                  <p id="original-details" class="preview-box-meta"></p>
+                </div>
+                <div class="preview-box success">
+                  <p class="preview-box-label">Compressed</p>
+                  <div class="preview-box-img">
+                    <img id="result-preview" class="preview-image" alt="Result">
+                  </div>
+                  <p id="result-details" class="preview-box-meta"></p>
+                </div>
+              </div>
+
+              <div id="status-card" class="status-card">
+                <span id="status-icon" class="status-card-icon">✓</span>
+                <div>
+                  <p id="status-title" class="status-card-title"></p>
+                  <p id="status-message" class="status-card-msg"></p>
+                </div>
+              </div>
+
+              <button id="download-button" type="button" class="btn btn-emerald" style="margin-top:16px">
+                ↓ Download Form-Ready JPG
+              </button>
+            </div>
+
+            <div id="error-panel" role="alert" class="error-panel hidden"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TOOL 2: IMAGE TO PDF ==================== -->
+      <section id="tool-img2pdf" class="tool-section">
+        <div class="section-header">
+          <div class="section-badge">📄 Client-Side · No Upload Required</div>
+          <h1 class="section-title">Images to <span>PDF</span></h1>
+          <p class="section-desc">
+            Convert multiple images into a single PDF. Reorder, remove, and customize page settings.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h2 class="card-title">1. Add Images</h2>
+            <p class="card-desc">Select multiple images to combine into a PDF.</p>
+
+            <label id="img2pdf-dropzone" for="img2pdf-input" class="drop-zone">
+              <div class="drop-zone-icon">↑</div>
+              <span class="drop-zone-title">Drop images or click to browse</span>
+              <span class="drop-zone-btn">Browse Images</span>
+              <span class="drop-zone-hint">JPG, PNG, WebP · Multiple files supported</span>
+            </label>
+            <input id="img2pdf-input" type="file" accept="image/jpeg,image/png,image/webp" multiple class="sr-only">
+
+            <div id="img2pdf-preview-area" class="hidden">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-top:16px;">
+                <span style="font-size:13px; font-weight:600; color:var(--slate-700);">
+                  <span id="img2pdf-count">0</span> images selected
+                </span>
+                <button type="button" id="img2pdf-clear-all" class="file-info-remove" style="margin:0">Clear All</button>
+              </div>
+              <div id="img2pdf-preview-grid" class="img-preview-grid"></div>
+            </div>
+
+            <div style="margin-top:20px;">
+              <h3 style="font-size:14px; font-weight:700; margin-bottom:12px; color:var(--slate-800);">Page Settings</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Page Size</label>
+                  <select id="img2pdf-pagesize" class="form-select">
+                    <option value="a4">A4 (210 × 297 mm)</option>
+                    <option value="letter">Letter (8.5 × 11 in)</option>
+                    <option value="legal">Legal (8.5 × 14 in)</option>
+                    <option value="a3">A3 (297 × 420 mm)</option>
+                    <option value="fit">Fit to Image</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Orientation</label>
+                  <select id="img2pdf-orientation" class="form-select">
+                    <option value="portrait">Portrait</option>
+                    <option value="landscape">Landscape</option>
+                    <option value="auto">Auto (match image)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Margin (px)</label>
+                <input id="img2pdf-margin" type="number" class="form-input" value="20" min="0" max="200">
+              </div>
+            </div>
+
+            <button id="img2pdf-generate" type="button" disabled class="btn btn-primary" style="margin-top:16px">
+              <span id="img2pdf-spinner" class="spinner hidden"></span>
+              <span id="img2pdf-label">Generate PDF</span>
+            </button>
+          </div>
+
+          <div class="card">
+            <h2 class="card-title">2. Download PDF</h2>
+            <p class="card-desc">Preview and download your generated PDF.</p>
+
+            <div id="img2pdf-empty" class="empty-state">
+              <div class="empty-state-icon">📄</div>
+              <p class="empty-state-title">PDF will appear here</p>
+              <p class="empty-state-desc">Add images and generate PDF.</p>
+            </div>
+
+            <div id="img2pdf-result" class="hidden">
+              <div class="status-card success">
+                <span class="status-card-icon">✓</span>
+                <div>
+                  <p class="status-card-title">PDF Generated Successfully</p>
+                  <p id="img2pdf-result-info" class="status-card-msg"></p>
+                </div>
+              </div>
+              <button id="img2pdf-download" type="button" class="btn btn-emerald" style="margin-top:16px">
+                ↓ Download PDF
+              </button>
+            </div>
+            <div id="img2pdf-error" role="alert" class="error-panel hidden"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TOOL 3: PDF TOOLKIT ==================== -->
+      <section id="tool-pdftool" class="tool-section">
+        <div class="section-header">
+          <div class="section-badge">🔧 Merge · Split · Compress</div>
+          <h1 class="section-title">PDF <span>Toolkit</span></h1>
+          <p class="section-desc">
+            Merge multiple PDFs, split by page ranges, or compress PDF file size — all in your browser.
+          </p>
+        </div>
+
+        <div style="display:flex; gap:8px; justify-content:center; margin-bottom:24px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-sm pdftool-subtab active" data-subtab="merge" style="width:auto">📎 Merge</button>
+          <button type="button" class="btn btn-sm pdftool-subtab" data-subtab="split" style="width:auto; background:white; color:var(--slate-700); border:1px solid var(--slate-300);">✂️ Split</button>
+          <button type="button" class="btn btn-sm pdftool-subtab" data-subtab="compress" style="width:auto; background:white; color:var(--slate-700); border:1px solid var(--slate-300);">📦 Compress</button>
+        </div>
+
+        <!-- MERGE -->
+        <div id="pdftool-merge" class="pdftool-panel">
+          <div class="grid-2">
+            <div class="card">
+              <h2 class="card-title">1. Add PDF Files</h2>
+              <p class="card-desc">Select multiple PDFs to merge into one.</p>
+
+              <label id="merge-dropzone" for="merge-input" class="drop-zone">
+                <div class="drop-zone-icon">📎</div>
+                <span class="drop-zone-title">Drop PDFs or click to browse</span>
+                <span class="drop-zone-btn">Browse PDFs</span>
+                <span class="drop-zone-hint">PDF files only · Multiple files supported</span>
+              </label>
+              <input id="merge-input" type="file" accept="application/pdf" multiple class="sr-only">
+
+              <div id="merge-file-list-area" class="hidden" style="margin-top:16px">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                  <span style="font-size:13px; font-weight:600; color:var(--slate-700);">
+                    <span id="merge-file-count">0</span> files added
+                  </span>
+                  <button type="button" id="merge-clear-all" class="file-info-remove" style="margin:0">Clear All</button>
+                </div>
+                <ul id="merge-file-list" class="pdf-file-list"></ul>
+                <p style="font-size:11px; color:var(--slate-400); margin-top:4px;">Drag to reorder files. Files merge in listed order.</p>
+              </div>
+
+              <button id="merge-btn" type="button" disabled class="btn btn-primary" style="margin-top:16px">
+                <span id="merge-spinner" class="spinner hidden"></span>
+                <span id="merge-label">Merge PDFs</span>
+              </button>
+            </div>
+
+            <div class="card">
+              <h2 class="card-title">2. Download Merged PDF</h2>
+              <p class="card-desc">Your combined PDF file.</p>
+              <div id="merge-empty" class="empty-state">
+                <div class="empty-state-icon">📎</div>
+                <p class="empty-state-title">Merged PDF will appear here</p>
+              </div>
+              <div id="merge-result" class="hidden">
+                <div class="status-card success">
+                  <span class="status-card-icon">✓</span>
+                  <div>
+                    <p class="status-card-title">PDFs Merged Successfully</p>
+                    <p id="merge-result-info" class="status-card-msg"></p>
+                  </div>
+                </div>
+                <button id="merge-download" type="button" class="btn btn-emerald" style="margin-top:16px">
+                  ↓ Download Merged PDF
+                </button>
+              </div>
+              <div id="merge-error" role="alert" class="error-panel hidden"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SPLIT -->
+        <div id="pdftool-split" class="pdftool-panel hidden">
+          <div class="grid-2">
+            <div class="card">
+              <h2 class="card-title">1. Select PDF to Split</h2>
+              <p class="card-desc">Upload a PDF and specify page ranges.</p>
+
+              <label id="split-dropzone" for="split-input" class="drop-zone">
+                <div class="drop-zone-icon">✂️</div>
+                <span class="drop-zone-title">Drop PDF or click to browse</span>
+                <span class="drop-zone-btn">Browse PDF</span>
+                <span class="drop-zone-hint">Single PDF file</span>
+              </label>
+              <input id="split-input" type="file" accept="application/pdf" class="sr-only">
+
+              <div id="split-file-info" class="file-info hidden">
+                <div class="file-info-text">
+                  <p id="split-file-name" class="file-info-name"></p>
+                  <p id="split-file-meta" class="file-info-meta"></p>
+                </div>
+                <button type="button" id="split-remove" class="file-info-remove">Remove</button>
+              </div>
+
+              <div id="split-options" class="hidden" style="margin-top:16px">
+                <div class="form-group">
+                  <label class="form-label">Page Ranges</label>
+                  <input id="split-ranges" type="text" class="form-input" placeholder="e.g. 1-3, 5, 8-10">
+                  <p style="font-size:11px; color:var(--slate-400); margin-top:4px;">Comma-separated ranges. Each range creates a separate PDF.</p>
+                </div>
+              </div>
+
+              <button id="split-btn" type="button" disabled class="btn btn-primary" style="margin-top:16px">
+                <span id="split-spinner" class="spinner hidden"></span>
+                <span id="split-label">Split PDF</span>
+              </button>
+            </div>
+
+            <div class="card">
+              <h2 class="card-title">2. Download Split PDFs</h2>
+              <p class="card-desc">Download individual split files or all as ZIP.</p>
+              <div id="split-empty" class="empty-state">
+                <div class="empty-state-icon">✂️</div>
+                <p class="empty-state-title">Split PDFs will appear here</p>
+              </div>
+              <div id="split-result" class="hidden">
+                <div id="split-result-list"></div>
+                <button id="split-download-all" type="button" class="btn btn-emerald" style="margin-top:16px">
+                  ↓ Download All as ZIP
+                </button>
+              </div>
+              <div id="split-error" role="alert" class="error-panel hidden"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COMPRESS -->
+        <div id="pdftool-compress" class="pdftool-panel hidden">
+          <div class="grid-2">
+            <div class="card">
+              <h2 class="card-title">1. Select PDF to Compress</h2>
+              <p class="card-desc">Reduce PDF file size by removing unnecessary data.</p>
+
+              <label id="compress-dropzone" for="compress-input" class="drop-zone">
+                <div class="drop-zone-icon">📦</div>
+                <span class="drop-zone-title">Drop PDF or click to browse</span>
+                <span class="drop-zone-btn">Browse PDF</span>
+                <span class="drop-zone-hint">Single PDF file</span>
+              </label>
+              <input id="compress-input" type="file" accept="application/pdf" class="sr-only">
+
+              <div id="compress-file-info" class="file-info hidden">
+                <div class="file-info-text">
+                  <p id="compress-file-name" class="file-info-name"></p>
+                  <p id="compress-file-meta" class="file-info-meta"></p>
+                </div>
+                <button type="button" id="compress-remove" class="file-info-remove">Remove</button>
+              </div>
+
+              <div class="warning-box" style="margin-top:16px">
+                <strong>⚠️ Quality Note:</strong> Client-side PDF compression removes metadata and applies basic optimization. For aggressive compression, server-side tools are recommended.
+              </div>
+
+              <button id="compress-btn" type="button" disabled class="btn btn-primary" style="margin-top:16px">
+                <span id="compress-spinner" class="spinner hidden"></span>
+                <span id="compress-label">Compress PDF</span>
+              </button>
+            </div>
+
+            <div class="card">
+              <h2 class="card-title">2. Download Compressed PDF</h2>
+              <p class="card-desc">Check size reduction before downloading.</p>
+              <div id="compress-empty" class="empty-state">
+                <div class="empty-state-icon">📦</div>
+                <p class="empty-state-title">Compressed PDF will appear here</p>
+              </div>
+              <div id="compress-result" class="hidden">
+                <div id="compress-status-card" class="status-card success">
+                  <span class="status-card-icon">✓</span>
+                  <div>
+                    <p id="compress-result-title" class="status-card-title">Compression Complete</p>
+                    <p id="compress-result-info" class="status-card-msg"></p>
+                  </div>
+                </div>
+                <button id="compress-download" type="button" class="btn btn-emerald" style="margin-top:16px">
+                  ↓ Download Compressed PDF
+                </button>
+              </div>
+              <div id="compress-error" role="alert" class="error-panel hidden"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TOOL 4: PDF TO IMAGE ==================== -->
+      <section id="tool-pdf2img" class="tool-section">
+        <div class="section-header">
+          <div class="section-badge">🖼️ Convert PDF Pages to Images</div>
+          <h1 class="section-title">PDF to <span>Image</span></h1>
+          <p class="section-desc">
+            Convert PDF pages to PNG or JPG images. Select pages, choose resolution, download individually or as ZIP.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h2 class="card-title">1. Select PDF</h2>
+            <p class="card-desc">Upload a PDF to convert its pages to images.</p>
+
+            <label id="pdf2img-dropzone" for="pdf2img-input" class="drop-zone">
+              <div class="drop-zone-icon">📄</div>
+              <span class="drop-zone-title">Drop PDF or click to browse</span>
+              <span class="drop-zone-btn">Browse PDF</span>
+              <span class="drop-zone-hint">Single PDF file</span>
+            </label>
+            <input id="pdf2img-input" type="file" accept="application/pdf" class="sr-only">
+
+            <div id="pdf2img-file-info" class="file-info hidden">
+              <div class="file-info-text">
+                <p id="pdf2img-file-name" class="file-info-name"></p>
+                <p id="pdf2img-file-meta" class="file-info-meta"></p>
+              </div>
+              <button type="button" id="pdf2img-remove" class="file-info-remove">Remove</button>
+            </div>
+
+            <div id="pdf2img-options" class="hidden" style="margin-top:16px">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Format</label>
+                  <select id="pdf2img-format" class="form-select">
+                    <option value="png">PNG (Lossless)</option>
+                    <option value="jpeg">JPG (Smaller)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Resolution (DPI)</label>
+                  <select id="pdf2img-dpi" class="form-select">
+                    <option value="1">72 DPI (Fast)</option>
+                    <option value="1.5">108 DPI</option>
+                    <option value="2" selected>144 DPI (Good)</option>
+                    <option value="3">216 DPI (High)</option>
+                    <option value="4">288 DPI (Very High)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Page Ranges (leave empty for all pages)</label>
+                <input id="pdf2img-ranges" type="text" class="form-input" placeholder="e.g. 1-3, 5, 8-10">
+                <p style="font-size:11px; color:var(--slate-400); margin-top:4px;">Comma-separated ranges. Leave empty to convert all pages.</p>
+              </div>
+            </div>
+
+            <button id="pdf2img-btn" type="button" disabled class="btn btn-primary" style="margin-top:16px">
+              <span id="pdf2img-spinner" class="spinner hidden"></span>
+              <span id="pdf2img-label">Convert to Images</span>
+            </button>
+          </div>
+
+          <div class="card">
+            <h2 class="card-title">2. Download Images</h2>
+            <p class="card-desc">Download individual images or all as ZIP.</p>
+            <div id="pdf2img-empty" class="empty-state">
+              <div class="empty-state-icon">🖼️</div>
+              <p class="empty-state-title">Converted images will appear here</p>
+            </div>
+            <div id="pdf2img-result" class="hidden">
+              <div id="pdf2img-result-grid" class="result-downloads"></div>
+              <button id="pdf2img-download-all" type="button" class="btn btn-emerald" style="margin-top:16px">
+                ↓ Download All as ZIP
+              </button>
+            </div>
+            <div id="pdf2img-progress" class="hidden" style="margin-top:16px">
+              <p style="font-size:13px; font-weight:600; color:var(--slate-700);">
+                Converting page <span id="pdf2img-current">0</span> of <span id="pdf2img-total">0</span>...
+              </p>
+              <div class="progress-bar">
+                <div id="pdf2img-progress-bar" class="progress-bar-fill" style="width:0%"></div>
+              </div>
+            </div>
+            <div id="pdf2img-error" role="alert" class="error-panel hidden"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Donation Card -->
+      <section class="donation-card">
+        <div>
+          <h3 class="donation-title">Help Us Keep Server Free</h3>
+          <p class="donation-desc">Form bharne me time bacha? Server maintenance ke liye chhota support karein.</p>
+        </div>
+        <button id="open-donation-btn" type="button" class="donation-btn">
+          ☕ Support / Donate ₹10
+        </button>
+      </section>
+
+      <!-- Bottom Native Banner -->
+      <div class="ad-container" id="ad-bottom">
+        <script async="async" data-cfasync="false"
+          src="https://bauval.org/21/e5c3d6799cf2b5c1812dda749caac534"></script>
+        <div id="container-e5c3d6799cf2b5c1812dda749caac534"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- OWNER / CREATOR VIP MODAL -->
+  <div id="owner-vip-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="border: 2px solid #fbbf24;">
+      <div style="font-size:40px; margin-bottom:8px;">👑</div>
+      <span style="display:inline-block; border-radius:20px; background:#fef3c7; color:#92400e; font-size:11px; font-weight:800; text-transform:uppercase; padding:4px 12px; letter-spacing:1px; margin-bottom:8px;">
+        Owner Verified
+      </span>
+      <h3 style="font-size:20px; font-weight:800; color:var(--slate-900);">Welcome, Creator!</h3>
+      <p style="font-size:12px; color:var(--slate-500); margin-top:4px;">Aapka secret bypass activate ho gaya hai.</p>
+
+      <div style="margin:16px 0; border-radius:var(--radius); background:rgba(254,243,199,0.7); border:1px solid #fde68a; padding:16px; text-align:left;">
+        <p style="font-size:12px; font-weight:700; color:#78350f;">Privileges Unlocked:</p>
+        <ul style="font-size:11px; color:#92400e; margin-top:6px; padding-left:16px;">
+          <li>✓ Zero Limits & No Payment Wall</li>
+          <li>✓ Unlimited Photo & Signature Resizing</li>
+          <li>✓ All PDF Tools Unlimited</li>
+          <li>✓ Lifetime Free Device Access</li>
+        </ul>
+      </div>
+
+      <button id="confirm-owner-btn" type="button" class="btn" style="background:#f59e0b; color:white;">
+        Activate VIP Owner Pass ✓
       </button>
-    </section>
+    </div>
+  </div>
 
-    <!-- Preview Box -->
-    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-      <h2 class="text-lg font-bold text-slate-900">2. Download output</h2>
-      <p class="mt-1 mb-5 text-sm text-slate-500">Check size before downloading.</p>
-
-      <div id="empty-preview" class="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-5 text-center">
-        <div class="text-4xl text-slate-300">▧</div>
-        <p class="mt-3 font-semibold text-slate-600">Output will appear here</p>
-        <p class="mt-1 text-sm text-slate-400">Upload your file to test.</p>
+  <!-- PAYWALL MODAL -->
+  <div id="paywall-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div style="display:inline-flex; align-items:center; gap:6px; border-radius:20px; background:var(--amber-light); border:1px solid #fde68a; padding:4px 12px; font-size:11px; font-weight:700; color:#92400e; margin-bottom:8px;">
+        ⚡ Daily Free Limit Reached
       </div>
 
-      <div id="result-panel" class="hidden">
-        <div class="grid grid-cols-2 gap-3">
-          <div class="rounded-xl border border-slate-200 p-3">
-            <p class="mb-3 text-xs font-semibold uppercase text-slate-500">Original</p>
-            <div class="flex h-36 items-center justify-center overflow-hidden rounded-lg bg-slate-50">
-              <img id="original-preview" class="preview-image" alt="Original">
-            </div>
-            <p id="original-details" class="mt-2 text-xs text-slate-500"></p>
-          </div>
+      <h3 style="font-size:20px; font-weight:800; color:var(--slate-900);">Unlock More Downloads</h3>
+      <p style="font-size:12px; color:var(--slate-500); margin-top:4px;">Aapke 4 free credits aaj ke liye khatam ho chuke hain.</p>
 
-          <div class="rounded-xl border border-emerald-200 bg-emerald-50/30 p-3">
-            <p class="mb-3 text-xs font-semibold uppercase text-emerald-700">Compressed</p>
-            <div class="flex h-36 items-center justify-center overflow-hidden rounded-lg bg-white">
-              <img id="result-preview" class="preview-image" alt="Result">
-            </div>
-            <p id="result-details" class="mt-2 text-xs font-semibold text-emerald-700"></p>
-          </div>
-        </div>
+      <div style="margin:12px 0; border-radius:var(--radius-sm); background:var(--slate-100); padding:8px; font-size:12px; font-weight:500; color:var(--slate-600);">
+        Agla free quota reset hoga: <span id="reset-in-timer" style="font-weight:700; color:var(--primary);">--:--</span>
+      </div>
 
-        <div id="status-card" class="mt-4 rounded-xl border p-3">
-          <div class="flex items-start gap-2.5">
-            <span id="status-icon" class="text-lg">✓</span>
+      <div id="pay-initial-step" style="margin-top:16px;">
+        <div id="plan-single-card" class="plan-card selected" onclick="selectPlan('single')" style="margin-bottom:12px;">
+          <div class="plan-card-row">
             <div>
-              <p id="status-title" class="text-sm font-bold"></p>
-              <p id="status-message" class="text-xs leading-4 mt-0.5 text-slate-600"></p>
+              <span id="single-plan-title" class="plan-card-title">Quick Exam Pass</span>
+              <p class="plan-card-sub">Instant unlimited for today</p>
             </div>
+            <span id="single-plan-price" class="plan-card-price" style="color:var(--primary);">₹19</span>
           </div>
         </div>
 
-        <button id="download-button" type="button"
-          class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3.5 text-center font-bold text-white shadow-sm hover:bg-emerald-700 transition">
-          ↓ Download Form-Ready JPG
+        <div id="plan-month-card" class="plan-card" onclick="selectPlan('monthly')" style="margin-bottom:16px;">
+          <div class="plan-card-row">
+            <div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span class="plan-card-title">1 Month Cyber/Pro Pass</span>
+                <span style="padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; background: #fef3c7; color: #92400e;">Best Value</span>
+              </div>
+              <p class="plan-card-sub">Full 30 Days Unlimited Downloads</p>
+            </div>
+            <span class="plan-card-price" style="color:var(--slate-900);">₹129</span>
+          </div>
+        </div>
+
+        <button id="show-qr-btn" type="button" class="btn btn-primary">
+          Pay <span id="btn-pay-amount">₹19</span> via UPI QR Code →
         </button>
       </div>
 
-      <div id="error-panel" role="alert" class="mt-4 hidden rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"></div>
-    </section>
-  </div>
+      <div id="pay-qr-step" class="hidden">
+        <div style="display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; font-weight:600; color:var(--rose); background:var(--rose-light); border:1px solid #fecdd3; padding:8px; border-radius:var(--radius-sm); margin-bottom:12px;">
+          <span>⏳ QR Code valid for:</span>
+          <span id="countdown-timer" style="font-family:monospace; font-weight:700; font-size:14px;">02:00</span>
+        </div>
 
-  <!-- Donation Card -->
-  <section class="mx-auto mt-7 max-w-5xl rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div>
-        <h3 class="font-bold text-slate-900 text-sm md:text-base">Help Us Keep Server Free</h3>
-        <p class="text-xs text-slate-500 mt-0.5">Form bharne me time bacha? Server maintenance ke liye chhota support karein.</p>
-      </div>
-      <button id="open-donation-btn" type="button" 
-        class="shrink-0 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold px-4 py-2.5 text-xs hover:bg-indigo-100 transition flex items-center gap-1.5">
-        ☕ Support / Donate ₹10
-      </button>
-    </div>
-  </section>
-
-  <!-- Bottom Ad Space: Native Banner -->
-  <div class="mt-7 flex min-h-[60px] flex-col items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm text-center">
-    <script async="async" data-cfasync="false" src="https://bauval.org/21/e5c3d6799cf2b5c1812dda749caac534"></script>
-    <div id="container-e5c3d6799cf2b5c1812dda749caac534"></div>
-  </div>
-</main>
-
-<!-- OWNER / CREATOR VIP MODAL -->
-<div id="owner-vip-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-md hidden">
-  <div class="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl border-2 border-amber-400 text-center relative overflow-hidden">
-    <div class="text-4xl mb-2">👑</div>
-    <span class="inline-block rounded-full bg-amber-100 text-amber-800 text-xs font-black uppercase px-3 py-1 mb-2 tracking-wide">
-      Owner Verified
-    </span>
-    <h3 class="text-xl font-black text-slate-900">Welcome, Creator!</h3>
-    <p class="text-xs text-slate-500 mt-1">Aapka secret bypass activate ho gaya hai.</p>
-
-    <div class="my-4 rounded-2xl bg-amber-50/70 border border-amber-200 p-4 text-left">
-      <p class="text-xs font-bold text-amber-900">Privileges Unlocked:</p>
-      <ul class="text-[11px] text-amber-800 mt-1.5 space-y-1">
-        <li>✓ Zero Limits & No Payment Wall</li>
-        <li>✓ Unlimited Photo & Signature Resizing</li>
-        <li>✓ Lifetime Free Device Access</li>
-      </ul>
-    </div>
-
-    <button id="confirm-owner-btn" type="button" 
-      class="w-full rounded-xl bg-amber-500 hover:bg-amber-600 py-3.5 text-sm font-bold text-white shadow-md transition">
-      Activate VIP Owner Pass ✓
-    </button>
-  </div>
-</div>
-
-<!-- PAYWALL MODAL -->
-<div id="paywall-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm hidden">
-  <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-slate-100 text-center relative overflow-hidden">
-    
-    <div class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-bold text-amber-700 mb-2">
-      ⚡ Daily Free Limit Reached
-    </div>
-
-    <h3 class="text-xl font-extrabold text-slate-900">Unlock More Downloads</h3>
-    <p class="text-xs text-slate-500 mt-1">Aapke 4 free credits aaj ke liye khatam ho chuke hain.</p>
-
-    <div class="my-3 rounded-xl bg-slate-100 p-2 text-xs font-medium text-slate-600">
-      Agla free quota reset hoga: <span id="reset-in-timer" class="font-bold text-indigo-600">--:--</span>
-    </div>
-
-    <div id="pay-initial-step" class="space-y-3 mt-4">
-      <div id="plan-single-card" class="rounded-2xl border-2 border-indigo-600 bg-indigo-50/50 p-4 text-left cursor-pointer hover:border-indigo-700 transition" onclick="selectPlan('single')">
-        <div class="flex items-center justify-between">
-          <div>
-            <span id="single-plan-title" class="text-sm font-bold text-slate-800">Quick Exam Pass</span>
-            <p class="text-[11px] text-slate-500 mt-0.5">Instant unlimited for today</p>
+        <div style="display:flex; justify-content:center; margin:8px 0;">
+          <div class="qr-frame">
+            <img id="dynamic-qr-img" src="" alt="UPI QR Code">
           </div>
-          <span id="single-plan-price" class="text-2xl font-black text-indigo-700">₹19</span>
         </div>
-      </div>
 
-      <div id="plan-month-card" class="rounded-2xl border border-slate-200 bg-white p-4 text-left cursor-pointer hover:border-indigo-400 transition" onclick="selectPlan('monthly')">
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="flex items-center gap-1.5">
-              <span class="text-sm font-bold text-slate-800">1 Month Cyber/Pro Pass</span>
-              <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Best Value</span>
-            </div>
-            <p class="text-[11px] text-slate-500 mt-0.5">Full 30 Days Unlimited Downloads</p>
-          </div>
-          <span class="text-2xl font-black text-slate-900">₹129</span>
-        </div>
-      </div>
-
-      <button id="show-qr-btn" type="button" 
-        class="w-full rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-md hover:bg-indigo-700 transition mt-2">
-        Pay <span id="btn-pay-amount">₹19</span> via UPI QR Code →
-      </button>
-    </div>
-
-    <div id="pay-qr-step" class="hidden">
-      <div class="mb-3 flex items-center justify-center gap-2 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 py-1.5 rounded-xl">
-        <span>⏳ QR Code valid for:</span>
-        <span id="countdown-timer" class="font-mono font-bold text-sm">02:00</span>
-      </div>
-
-      <div class="flex justify-center my-2">
-        <div class="p-2 border-2 border-indigo-200 rounded-2xl bg-white shadow-inner">
-          <img id="dynamic-qr-img" src="" alt="UPI QR Code" class="h-36 w-36 rounded-lg">
-        </div>
-      </div>
-
-      <p class="text-[11px] text-slate-500 font-medium">Scan & Pay via PhonePe, Google Pay, Paytm, or BHIM</p>
-      
-      <div class="mt-3.5 rounded-2xl border border-indigo-100 bg-indigo-50/50 p-3 text-left">
-        <label for="utr-input" class="block text-xs font-bold text-slate-800">
-          Enter 12-Digit UPI / UTR Reference No. <span class="text-rose-600">*</span>
-        </label>
-        <p class="text-[10px] text-slate-500 mt-0.5">Payment app ki history me 12-digit UTR/Ref number dekhein.</p>
-        <input id="utr-input" type="text" maxlength="12" inputmode="numeric" placeholder="e.g. 4289XXXXXXXX"
-          class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-center text-sm font-bold tracking-widest text-slate-900 placeholder:tracking-normal placeholder:font-normal placeholder:text-slate-400 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600">
-        <p id="utr-error" class="mt-1.5 hidden text-[11px] font-semibold text-rose-600">
-          ⚠️ Kripya valid 12-digit UPI UTR number enter karein.
+        <p style="font-size:11px; color:var(--slate-500); font-weight:500; margin-top:8px;">
+          Scan & Pay via PhonePe, Google Pay, Paytm, or BHIM
         </p>
+
+        <div style="margin-top:16px; border-radius:var(--radius); border:1px solid #c7d2fe; background:rgba(238,242,255,0.5); padding:12px; text-align:left;">
+          <label for="utr-input" style="font-size:12px; font-weight:700; color:var(--slate-800);">
+            Enter 12-Digit UPI / UTR Reference No. <span style="color:var(--rose);">*</span>
+          </label>
+          <p style="font-size:10px; color:var(--slate-500); margin-top:2px;">Payment app ki history me 12-digit UTR/Ref number dekhein.</p>
+          <input id="utr-input" type="text" maxlength="12" inputmode="numeric" placeholder="e.g. 4289XXXXXXXX"
+            class="utr-input" style="margin-top:8px;">
+          <p id="utr-error" class="hidden" style="margin-top:6px; font-size:11px; font-weight:600; color:var(--rose);">
+            ⚠️ Kripya valid 12-digit UPI UTR number enter karein.
+          </p>
+        </div>
+
+        <button id="paid-verify-button" type="button" class="btn btn-emerald" style="margin-top:14px;">
+          <span id="utr-verify-spinner" class="spinner hidden" style="width:16px; height:16px; border-width:2px;"></span>
+          <span id="utr-verify-label">Submit for Manual Verification</span>
+        </button>
+
+        <div id="verification-pending-msg" class="hidden" style="margin-top:12px;">
+          <div class="info-box">
+            <strong>📋 Verification Submitted</strong><br>
+            Your UTR has been recorded. Since we do not use a backend server to auto-verify, contact
+            <a href="mailto:darshsolanki55@gmail.com" style="color:var(--primary); font-weight:600;">darshsolanki55@gmail.com</a>
+            with your UTR for instant manual activation.
+          </div>
+        </div>
+
+        <button id="back-to-plans-btn" type="button" style="margin-top:10px; font-size:12px; color:var(--primary); font-weight:600; background:none; border:none; cursor:pointer;">
+          ← Change Plan
+        </button>
       </div>
 
-      <button id="paid-verify-button" type="button" 
-        class="mt-3.5 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition disabled:bg-slate-400">
-        <span id="utr-verify-spinner" class="spinner hidden" style="width: 16px; height: 16px; border-width: 2px;"></span>
-        <span id="utr-verify-label">Verify Payment & Unlock Pro ✓</span>
-      </button>
-
-      <button id="back-to-plans-btn" type="button" class="mt-2.5 text-xs text-indigo-600 font-semibold">
-        ← Change Plan
-      </button>
-    </div>
-
-    <button id="close-modal-btn" type="button" class="mt-3 text-xs text-slate-400 hover:text-slate-600">
-      Cancel & Wait for 24h Reset
-    </button>
-  </div>
-</div>
-
-<!-- DONATION MODAL -->
-<div id="donation-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/75 p-4 backdrop-blur-sm hidden">
-  <div class="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl border border-slate-100 text-center">
-    <div class="text-3xl mb-1">☕</div>
-    <h3 class="text-lg font-bold text-slate-900">Support PhotoCompressor</h3>
-    <p class="text-xs text-slate-500 mt-1">Ek chai ke barabar contribution server online rakhta hai.</p>
-
-    <div class="flex justify-center my-3">
-      <div class="p-2 border border-slate-200 rounded-2xl bg-white shadow-sm">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa=6351695089@fam%26pn=PhotoCompressorSupport%26am=10%26cu=INR" 
-             alt="Donation QR" class="h-32 w-32 rounded-lg">
-      </div>
-    </div>
-    
-    <p class="text-xs font-semibold text-indigo-700 bg-indigo-50 py-1.5 rounded-lg select-all">
-      UPI: 6351695089@fam
-    </p>
-
-    <button id="close-donation-btn" type="button" class="mt-4 w-full rounded-xl bg-slate-100 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition">
-      Done / Back
-    </button>
-  </div>
-</div>
-
-<!-- PRIVACY POLICY MODAL -->
-<div id="privacy-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm hidden">
-  <div class="w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-slate-100 text-left relative">
-    <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-      <h3 class="text-xl font-bold text-slate-900">Privacy Policy</h3>
-      <button id="close-privacy-btn" type="button" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none">&times;</button>
-    </div>
-    
-    <div class="space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
-      <p class="text-slate-500 italic">Effective Date: October 2026</p>
-      <p>Welcome to <strong>Photo Compressor - Exam Ready</strong>. Your privacy is our highest priority.</p>
-
-      <div>
-        <h4 class="font-bold text-slate-800 text-sm mb-1">1. 100% Client-Side Processing</h4>
-        <p>All photo resizing, signature compression, and image processing happen entirely locally within your device's web browser using client-side JavaScript and HTML5 Canvas. <strong>Your photos, signatures, and documents are NEVER uploaded to our servers, stored in any database, or shared with third parties.</strong></p>
-      </div>
-
-      <div>
-        <h4 class="font-bold text-slate-800 text-sm mb-1">2. Zero Personal Data Collection</h4>
-        <p>We do not collect names, phone numbers, email addresses, or any personally identifiable information (PII). No user account creation or sign-in is required to use this tool.</p>
-      </div>
-
-      <div>
-        <h4 class="font-bold text-slate-800 text-sm mb-1">3. Local Device Storage</h4>
-        <p>The application only saves standard UI preferences and usage counters locally inside your device browser (using browser localStorage). This data remains strictly on your device.</p>
-      </div>
-
-      <div>
-        <h4 class="font-bold text-slate-800 text-sm mb-1">4. Contact & Support</h4>
-        <p>For inquiries or technical questions regarding this policy, contact us at: <a href="mailto:darshsolanki55@gmail.com" class="text-indigo-600 underline font-semibold">darshsolanki55@gmail.com</a></p>
-      </div>
-    </div>
-
-    <div class="mt-6 border-t border-slate-200 pt-4 text-right">
-      <button id="close-privacy-btn-bottom" type="button" class="rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-indigo-700 transition">
-        I Understand & Close
+      <button id="close-modal-btn" type="button" style="margin-top:12px; font-size:12px; color:var(--slate-400); background:none; border:none; cursor:pointer;">
+        Cancel & Wait for 24h Reset
       </button>
     </div>
   </div>
-</div>
 
-<!-- FOOTER WITH PRIVACY POLICY LINK -->
-<footer class="mt-10 border-t border-slate-200 bg-white">
-  <div class="mx-auto max-w-6xl px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-    <div>
-      PhotoCompressor · Privacy First Image Compression · Automatic 24h Reset
-    </div>
-    <div class="flex items-center gap-4">
-      <button id="open-privacy-btn" type="button" class="font-semibold text-indigo-600 hover:text-indigo-800 underline">
-        Privacy Policy
+  <!-- DONATION MODAL -->
+  <div id="donation-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div style="font-size:32px; margin-bottom:4px;">☕</div>
+      <h3 style="font-size:18px; font-weight:700; color:var(--slate-900);">Support ExamReady</h3>
+      <p style="font-size:12px; color:var(--slate-500); margin-top:4px;">Ek chai ke barabar contribution server online rakhta hai.</p>
+
+      <div style="display:flex; justify-content:center; margin:12px 0;">
+        <div class="qr-frame">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi%3A%2F%2Fpay%3Fpa%3D6351695089%40fam%26pn%3DExamReadySupport%26am%3D10%26cu%3DINR"
+            alt="Donation QR" style="width:128px; height:128px;">
+        </div>
+      </div>
+
+      <p style="font-size:12px; font-weight:600; color:var(--primary); background:var(--primary-light); padding:8px; border-radius:var(--radius-xs); user-select:all;">
+        UPI: 6351695089@fam
+      </p>
+
+      <button id="close-donation-btn" type="button" class="btn btn-outline" style="margin-top:16px;">
+        Done / Back
       </button>
-      <span>·</span>
-      <span>© 2026 ExamReady</span>
     </div>
   </div>
-</footer>
 
-<script>
-"use strict";
-
-// --- ADSTERRA SMARTLINK / DIRECT LINK INTEGRATION ---
-const ADSTERRA_DIRECT_LINK = "https://asiafilm.org/4/7dd089ccd54a10b01e1be6f140edd04f";
-
-const MAX_FREE_USAGE = 4;
-const RESET_HOURS = 24;
-const RESET_MS = RESET_HOURS * 60 * 60 * 1000;
-const MAX_FILE_BYTES = 20 * 1024 * 1024;
-
-const PRESETS = {
-  passport: { width: 350, height: 450, minKB: 20, maxKB: 50, label: "Passport Photo", filename: "photocompressor-passport.jpg" },
-  signature: { width: 300, height: 120, minKB: 10, maxKB: 20, label: "Signature", filename: "photocompressor-signature.jpg" }
-};
-
-const $ = id => document.getElementById(id);
-
-const el = {
-  input: $("file-input"),
-  zone: $("drop-zone"),
-  sourceInfo: $("source-info"),
-  sourceName: $("source-name"),
-  sourceMeta: $("source-meta"),
-  processButton: $("process-button"),
-  processLabel: $("process-label"),
-  spinner: $("process-spinner"),
-  emptyPreview: $("empty-preview"),
-  resultPanel: $("result-panel"),
-  errorPanel: $("error-panel"),
-  originalPreview: $("original-preview"),
-  resultPreview: $("result-preview"),
-  originalDetails: $("original-details"),
-  resultDetails: $("result-details"),
-  statusCard: $("status-card"),
-  statusIcon: $("status-icon"),
-  statusTitle: $("status-title"),
-  statusMessage: $("status-message"),
-  download: $("download-button"),
-  paywallModal: $("paywall-modal"),
-  donationModal: $("donation-modal"),
-  privacyModal: $("privacy-modal"),
-  creditCount: $("credit-count"),
-  countdownTimer: $("countdown-timer"),
-  payInitialStep: $("pay-initial-step"),
-  payQrStep: $("pay-qr-step"),
-  resetInTimer: $("reset-in-timer"),
-  dynamicQrImg: $("dynamic-qr-img"),
-  utrInput: $("utr-input"),
-  utrError: $("utr-error"),
-  paidVerifyBtn: $("paid-verify-button"),
-  utrVerifyLabel: $("utr-verify-label"),
-  utrVerifySpinner: $("utr-verify-spinner")
-};
-
-let mode = "passport";
-let selectedFile = null;
-let originalURL = null;
-let resultURL = null;
-let currentBlob = null;
-let isProcessing = false;
-let operationId = 0;
-let countdownInterval = null;
-let selectedPlanType = 'single';
-
-// Privacy Modal Controls
-$("open-privacy-btn").addEventListener("click", () => el.privacyModal.classList.remove("hidden"));
-$("close-privacy-btn").addEventListener("click", () => el.privacyModal.classList.add("hidden"));
-$("close-privacy-btn-bottom").addEventListener("click", () => el.privacyModal.classList.add("hidden"));
-
-// URL Param Check for App Shortcuts (?mode=signature)
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get("mode") === "signature") {
-  setMode("signature");
-}
-
-// --- RELIABLE 10-CLICK OWNER / ADMIN ENGINE ---
-let adminClicks = 0;
-let clickResetTimer = null;
-
-const adminTrigger = $("admin-secret-logo");
-
-adminTrigger.addEventListener("click", function(e) {
-  e.preventDefault();
-  e.stopPropagation();
-
-  adminClicks++;
-
-  adminTrigger.style.transform = "scale(0.92)";
-  setTimeout(() => { adminTrigger.style.transform = "scale(1)"; }, 100);
-
-  clearTimeout(clickResetTimer);
-  clickResetTimer = setTimeout(() => {
-    adminClicks = 0;
-  }, 8000);
-
-  if (adminClicks >= 10) {
-    adminClicks = 0;
-    clearTimeout(clickResetTimer);
-    $("owner-vip-modal").classList.remove("hidden");
-  }
-});
-
-$("confirm-owner-btn").addEventListener("click", () => {
-  localStorage.setItem("examready_is_admin", "true");
-  localStorage.setItem("examready_is_pro", "true");
-  $("owner-vip-modal").classList.add("hidden");
-  updateStatusUI();
-  alert("Owner verified! Unlimited access is now permanently active on this browser.");
-});
-
-function isCreatorAdmin() {
-  return localStorage.getItem("examready_is_admin") === "true";
-}
-
-// 1. Subscription & 24h Reset Engine
-function checkExpiryAndReset() {
-  if (isCreatorAdmin()) return;
-
-  const now = Date.now();
-
-  const monthlyExpiry = localStorage.getItem("examready_monthly_expiry");
-  if (monthlyExpiry) {
-    if (now > parseInt(monthlyExpiry, 10)) {
-      localStorage.removeItem("examready_monthly_expiry");
-      localStorage.removeItem("examready_is_pro");
-    } else {
-      return;
-    }
-  }
-
-  const lastReset = localStorage.getItem("examready_last_reset");
-  if (!lastReset) {
-    localStorage.setItem("examready_last_reset", now.toString());
-    localStorage.setItem("examready_usage_count", "0");
-  } else if (now - parseInt(lastReset, 10) >= RESET_MS) {
-    localStorage.setItem("examready_usage_count", "0");
-    localStorage.setItem("examready_last_reset", now.toString());
-  }
-}
-
-function isProActive() {
-  if (isCreatorAdmin()) {
-    return { active: true, type: "admin" };
-  }
-
-  checkExpiryAndReset();
-  const monthlyExpiry = localStorage.getItem("examready_monthly_expiry");
-  if (monthlyExpiry && Date.now() <= parseInt(monthlyExpiry, 10)) {
-    return { active: true, type: "monthly" };
-  }
-  if (localStorage.getItem("examready_is_pro") === "true") {
-    return { active: true, type: "pass" };
-  }
-  return { active: false };
-}
-
-function getUsageCount() {
-  return parseInt(localStorage.getItem("examready_usage_count") || "0", 10);
-}
-
-function getTimeUntilReset() {
-  const lastReset = parseInt(localStorage.getItem("examready_last_reset") || Date.now().toString(), 10);
-  const elapsed = Date.now() - lastReset;
-  const remainingMs = Math.max(0, RESET_MS - elapsed);
-  
-  const hours = Math.floor(remainingMs / (1000 * 60 * 60));
-  const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
-  return `${hours}h ${minutes}m`;
-}
-
-function updateStatusUI() {
-  checkExpiryAndReset();
-  const pro = isProActive();
-
-  if (pro.active) {
-    if (pro.type === "admin") {
-      $("status-badge").className = "rounded-full border border-amber-300 bg-amber-50 px-3.5 py-1.5 text-xs font-bold text-amber-800 shadow-sm";
-      $("status-badge").innerHTML = "👑 Creator VIP (Unlimited Free)";
-    } else if (pro.type === "monthly") {
-      const exp = parseInt(localStorage.getItem("examready_monthly_expiry"), 10);
-      const daysLeft = Math.ceil((exp - Date.now()) / (1000 * 60 * 60 * 24));
-      $("status-badge").className = "rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-xs font-semibold text-emerald-700";
-      $("status-badge").innerHTML = `★ 1 Month Pass (${daysLeft} days left)`;
-    } else {
-      $("status-badge").className = "rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-xs font-semibold text-emerald-700";
-      $("status-badge").innerHTML = "★ Unlimited Pro Pass";
-    }
-    return;
-  }
-
-  const remaining = Math.max(0, MAX_FREE_USAGE - getUsageCount());
-  el.creditCount.textContent = remaining;
-  if (remaining === 0) {
-    $("status-badge").className = "rounded-full border border-rose-200 bg-rose-50 px-3.5 py-1.5 text-xs font-semibold text-rose-700";
-  } else {
-    $("status-badge").className = "rounded-full border border-indigo-200 bg-indigo-50 px-3.5 py-1.5 text-xs font-semibold text-indigo-700";
-  }
-}
-updateStatusUI();
-
-function getCurrentSinglePrice() {
-  const hasPaidOnce = localStorage.getItem("examready_paid_once") === "true";
-  return hasPaidOnce ? 29 : 19;
-}
-
-function selectPlan(type) {
-  selectedPlanType = type;
-  const singleCard = $("plan-single-card");
-  const monthCard = $("plan-month-card");
-  const price = getCurrentSinglePrice();
-
-  if (type === 'single') {
-    singleCard.className = "rounded-2xl border-2 border-indigo-600 bg-indigo-50/50 p-4 text-left cursor-pointer transition";
-    monthCard.className = "rounded-2xl border border-slate-200 bg-white p-4 text-left cursor-pointer hover:border-indigo-400 transition";
-    $("btn-pay-amount").textContent = `₹${price}`;
-  } else {
-    monthCard.className = "rounded-2xl border-2 border-indigo-600 bg-indigo-50/50 p-4 text-left cursor-pointer transition";
-    singleCard.className = "rounded-2xl border border-slate-200 bg-white p-4 text-left cursor-pointer hover:border-indigo-400 transition";
-    $("btn-pay-amount").textContent = `₹129`;
-  }
-}
-
-function showPaywall() {
-  checkExpiryAndReset();
-  const price = getCurrentSinglePrice();
-  $("single-plan-price").textContent = `₹${price}`;
-  $("single-plan-title").textContent = (price === 19) ? "Starter Exam Pass" : "Power Exam Pass";
-  $("reset-in-timer").textContent = getTimeUntilReset();
-
-  selectPlan('single');
-  el.payInitialStep.classList.remove("hidden");
-  el.payQrStep.classList.add("hidden");
-  el.paywallModal.classList.remove("hidden");
-}
-
-function startTimer(durationSeconds) {
-  clearInterval(countdownInterval);
-  let timer = durationSeconds;
-  
-  function updateDisplay() {
-    let minutes = Math.floor(timer / 60);
-    let seconds = timer % 60;
-    el.countdownTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  }
-
-  updateDisplay();
-  countdownInterval = setInterval(() => {
-    timer--;
-    if (timer < 0) {
-      timer = 120;
-    }
-    updateDisplay();
-  }, 1000);
-}
-
-$("show-qr-btn").addEventListener("click", () => {
-  const amount = (selectedPlanType === 'single') ? getCurrentSinglePrice() : 129;
-  const upiUrl = `upi://pay?pa=6351695089@fam%26pn=PhotoCompressor%26am=${amount}%26cu=INR`;
-  el.dynamicQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUrl)}`;
-
-  el.utrInput.value = "";
-  el.utrError.classList.add("hidden");
-  el.payInitialStep.classList.add("hidden");
-  el.payQrStep.classList.remove("hidden");
-  startTimer(120);
-});
-
-$("back-to-plans-btn").addEventListener("click", () => {
-  clearInterval(countdownInterval);
-  el.payQrStep.classList.add("hidden");
-  el.payInitialStep.classList.remove("hidden");
-});
-
-$("close-modal-btn").addEventListener("click", () => {
-  el.paywallModal.classList.add("hidden");
-  clearInterval(countdownInterval);
-});
-
-// Real 12-Digit UTR Check
-el.paidVerifyBtn.addEventListener("click", () => {
-  const utr = el.utrInput.value.trim();
-
-  if (!/^\d{12}$/.test(utr) || utr === "000000000000" || utr === "123456789012") {
-    el.utrError.classList.remove("hidden");
-    el.utrInput.focus();
-    return;
-  }
-  el.utrError.classList.add("hidden");
-
-  el.paidVerifyBtn.disabled = true;
-  el.utrVerifySpinner.classList.remove("hidden");
-  el.utrVerifyLabel.textContent = "Verifying UTR Reference...";
-
-  setTimeout(() => {
-    el.paidVerifyBtn.disabled = false;
-    el.utrVerifySpinner.classList.add("hidden");
-    el.utrVerifyLabel.textContent = "Verify Payment & Unlock Pro ✓";
-
-    const now = Date.now();
-    localStorage.setItem("examready_last_utr", utr);
-
-    if (selectedPlanType === 'monthly') {
-      const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-      localStorage.setItem("examready_monthly_expiry", (now + thirtyDaysMs).toString());
-    } else {
-      localStorage.setItem("examready_is_pro", "true");
-    }
-
-    localStorage.setItem("examready_paid_once", "true");
-    el.paywallModal.classList.add("hidden");
-    clearInterval(countdownInterval);
-    updateStatusUI();
-    triggerDirectDownload();
-  }, 1000);
-});
-
-$("open-donation-btn").addEventListener("click", () => el.donationModal.classList.remove("hidden"));
-$("close-donation-btn").addEventListener("click", () => el.donationModal.classList.add("hidden"));
-
-function formatBytes(bytes) {
-  return bytes < 1024 ? `${bytes} bytes` : `${(bytes / 1024).toFixed(1)} KB`;
-}
-
-function getPreset() {
-  return PRESETS[mode];
-}
-
-function clearResult() {
-  if (resultURL) URL.revokeObjectURL(resultURL);
-  resultURL = null;
-  currentBlob = null;
-  el.resultPreview.removeAttribute("src");
-  el.resultPanel.classList.add("hidden");
-  el.emptyPreview.classList.remove("hidden");
-}
-
-function showError(message) {
-  el.errorPanel.textContent = message;
-  el.errorPanel.classList.remove("hidden");
-}
-
-function clearError() {
-  el.errorPanel.textContent = "";
-  el.errorPanel.classList.add("hidden");
-}
-
-function setProcessing(active) {
-  isProcessing = active;
-  el.processButton.disabled = active || !selectedFile;
-  el.spinner.classList.toggle("hidden", !active);
-  el.processLabel.textContent = active ? "Optimizing image…" : "Optimize Image";
-}
-
-function setMode(newMode) {
-  if (!PRESETS[newMode]) return;
-  mode = newMode;
-  operationId++;
-
-  const passport = mode === "passport";
-  $("passport-mode").className = passport
-    ? "rounded-2xl border-2 border-indigo-600 bg-indigo-50 p-4 text-left"
-    : "rounded-2xl border-2 border-slate-200 bg-white p-4 text-left hover:border-indigo-300";
-
-  $("signature-mode").className = !passport
-    ? "rounded-2xl border-2 border-indigo-600 bg-indigo-50 p-4 text-left"
-    : "rounded-2xl border-2 border-slate-200 bg-white p-4 text-left hover:border-indigo-300";
-
-  $("passport-check").classList.toggle("invisible", !passport);
-  $("signature-check").classList.toggle("hidden", passport);
-
-  clearResult();
-  clearError();
-  setProcessing(false);
-
-  if (selectedFile) {
-    el.sourceMeta.textContent = `${formatBytes(selectedFile.size)} · Output ${getPreset().width} × ${getPreset().height} px`;
-  }
-}
-
-$("passport-mode").addEventListener("click", () => setMode("passport"));
-$("signature-mode").addEventListener("click", () => setMode("signature"));
-
-function acceptFile(file) {
-  if (!file) return;
-  clearError();
-
-  const supportedTypes = ["image/jpeg", "image/png", "image/webp"];
-  if (!supportedTypes.includes(file.type)) {
-    showError("Unsupported file type. Please select a JPG, PNG or WebP image.");
-    return;
-  }
-
-  if (file.size > MAX_FILE_BYTES) {
-    showError("The image exceeds the 20 MB limit.");
-    return;
-  }
-
-  operationId++;
-  setProcessing(false);
-  clearResult();
-
-  if (originalURL) URL.revokeObjectURL(originalURL);
-  selectedFile = file;
-  originalURL = URL.createObjectURL(file);
-
-  el.sourceName.textContent = file.name;
-  el.sourceMeta.textContent = `${formatBytes(file.size)} · Output ${getPreset().width} × ${getPreset().height} px`;
-  el.sourceInfo.classList.remove("hidden");
-  el.originalPreview.src = originalURL;
-  el.originalDetails.textContent = formatBytes(file.size);
-  el.processButton.disabled = false;
-
-  const image = new Image();
-  image.onload = () => {
-    if (selectedFile !== file) return;
-    el.originalDetails.textContent = `${image.naturalWidth} × ${image.naturalHeight} px · ${formatBytes(file.size)}`;
-  };
-  image.src = originalURL;
-}
-
-el.input.addEventListener("change", e => acceptFile(e.target.files[0]));
-
-$("remove-file").addEventListener("click", () => {
-  selectedFile = null;
-  el.input.value = "";
-  el.sourceInfo.classList.add("hidden");
-  clearResult();
-  clearError();
-  setProcessing(false);
-});
-
-// Drag and drop
-["dragenter", "dragover"].forEach(name => {
-  el.zone.addEventListener(name, e => { e.preventDefault(); el.zone.classList.add("dragging"); });
-});
-["dragleave", "drop"].forEach(name => {
-  el.zone.addEventListener(name, e => { e.preventDefault(); el.zone.classList.remove("dragging"); });
-});
-el.zone.addEventListener("drop", e => acceptFile(e.dataTransfer?.files?.[0]));
-
-function drawImageToCanvas(image, width, height) {
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d", { alpha: false });
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, width, height);
-
-  const sw = image.naturalWidth;
-  const sh = image.naturalHeight;
-  const sourceRatio = sw / sh;
-  const targetRatio = width / height;
-
-  let cw = sw, ch = sh, cx = 0, cy = 0;
-  if (sourceRatio > targetRatio) {
-    cw = sh * targetRatio;
-    cx = (sw - cw) / 2;
-  } else {
-    ch = sw / targetRatio;
-    cy = (sh - ch) / 2;
-  }
-
-  ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(image, cx, cy, cw, ch, 0, 0, width, height);
-  return canvas;
-}
-
-function canvasToBlob(canvas, quality) {
-  return new Promise(resolve => canvas.toBlob(blob => resolve(blob), "image/jpeg", quality));
-}
-
-async function findBestCompression(canvas, preset) {
-  const minBytes = preset.minKB * 1024;
-  const maxBytes = preset.maxKB * 1024;
-  let smallestBlob = null;
-  let smallestQuality = 0.1;
-
-  for (let step = 0; step <= 40; step++) {
-    const quality = Math.round((0.9 - step * 0.02) * 100) / 100;
-    const blob = await canvasToBlob(canvas, quality);
-
-    if (!smallestBlob || blob.size < smallestBlob.size) {
-      smallestBlob = blob;
-      smallestQuality = quality;
-    }
-
-    if (blob.size >= minBytes && blob.size <= maxBytes) {
-      return { blob, quality, compliant: true };
-    }
-  }
-
-  return { blob: smallestBlob, quality: smallestQuality, compliant: !!smallestBlob && smallestBlob.size >= minBytes && smallestBlob.size <= maxBytes };
-}
-
-function triggerDirectDownload() {
-  if (!currentBlob) return;
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(currentBlob);
-  a.download = getPreset().filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
-// Download Button: 1st Download Clean, 2nd Download se Smartlink Ad Trigger
-el.download.addEventListener("click", () => {
-  checkExpiryAndReset();
-  const pro = isProActive();
-  const currentUsage = getUsageCount();
-
-  // 1st Download (currentUsage === 0) bilkul clean rahega.
-  // 2nd Download se (currentUsage >= 1) sponsor ad open hoga:
-  if (!isCreatorAdmin() && ADSTERRA_DIRECT_LINK && currentUsage >= 1) {
-    window.open(ADSTERRA_DIRECT_LINK, "_blank");
-  }
-
-  // File Download Execution
-  if (pro.active) {
-    triggerDirectDownload();
-    return;
-  }
-
-  if (currentUsage >= MAX_FREE_USAGE) {
-    showPaywall();
-  } else {
-    localStorage.setItem("examready_usage_count", (currentUsage + 1).toString());
-    updateStatusUI();
-    triggerDirectDownload();
-  }
-});
-
-// Process Button
-el.processButton.addEventListener("click", async () => {
-  if (!selectedFile || isProcessing) return;
-
-  checkExpiryAndReset();
-  const pro = isProActive();
-
-  if (!pro.active && getUsageCount() >= MAX_FREE_USAGE) {
-    showPaywall();
-    return;
-  }
-
-  const file = selectedFile;
-  const preset = getPreset();
-  const thisOperation = ++operationId;
-
-  clearError();
-  clearResult();
-  setProcessing(true);
-
-  let tempURL = null;
-  try {
-    tempURL = URL.createObjectURL(file);
-    const img = new Image();
-    await new Promise((resolve, reject) => {
-      img.onload = resolve;
-      img.onerror = () => reject(new Error("Unable to open image."));
-      img.src = tempURL;
+  <!-- PRIVACY POLICY MODAL -->
+  <div id="privacy-modal" class="modal-overlay hidden">
+    <div class="modal-content wide">
+      <button id="close-privacy-btn" type="button" class="modal-close-x">&times;</button>
+      <div style="border-bottom:1px solid var(--slate-200); padding-bottom:12px; margin-bottom:16px;">
+        <h3 style="font-size:20px; font-weight:700; color:var(--slate-900);">Privacy Policy</h3>
+      </div>
+
+      <div style="font-size:13px; color:var(--slate-600); line-height:1.7;">
+        <p style="color:var(--slate-500); font-style:italic; margin-bottom:16px;">Effective Date: October 2026</p>
+        <p>Welcome to <strong>ExamReady — Photo Compressor & PDF Tools</strong>. Your privacy is our highest priority.</p>
+        <h4 style="font-weight:700; color:var(--slate-800); font-size:14px; margin-top:16px; margin-bottom:4px;">1. 100% Client-Side Processing</h4>
+        <p>All photo resizing, image-to-PDF, and PDF manipulations happen locally within your device browser using HTML5 Canvas and JavaScript libraries. <strong>Your photos and documents are NEVER uploaded to any server.</strong></p>
+        <h4 style="font-weight:700; color:var(--slate-800); font-size:14px; margin-top:16px; margin-bottom:4px;">2. Zero Data Collection</h4>
+        <p>We do not collect names, phone numbers, email addresses, or photos. No user sign-in required.</p>
+      </div>
+
+      <div style="margin-top:24px; border-top:1px solid var(--slate-200); padding-top:16px; text-align:right;">
+        <button id="close-privacy-btn-bottom" type="button" class="btn btn-primary" style="width:auto;">
+          I Understand & Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>ExamReady · Privacy First Image & PDF Tools · Automatic 24h Reset</div>
+      <div style="display:flex; align-items:center; gap:12px; justify-content:center;">
+        <button id="open-privacy-btn" type="button" class="footer-link">Privacy Policy</button>
+        <span>·</span>
+        <span>© 2026 ExamReady</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+
+    // --- ADSTERRA SMARTLINK INTEGRATION ---
+    const ADSTERRA_DIRECT_LINK = "https://asiafilm.org/4/7dd089ccd54a10b01e1be6f140edd04f";
+
+    const MAX_FREE_USAGE = 4;
+    const RESET_HOURS = 24;
+    const RESET_MS = RESET_HOURS * 60 * 60 * 1000;
+    const MAX_FILE_BYTES = 20 * 1024 * 1024;
+    const UPI_ID = "6351695089@fam";
+
+    const PRESETS = {
+      passport: { width: 350, height: 450, minKB: 20, maxKB: 50, label: "Passport Photo", filename: "examready-passport.jpg" },
+      signature: { width: 300, height: 120, minKB: 10, maxKB: 20, label: "Signature", filename: "examready-signature.jpg" }
+    };
+
+    const $ = id => document.getElementById(id);
+
+    // NAVIGATION TABS
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const target = tab.dataset.tab;
+        document.querySelectorAll('.tool-section').forEach(s => s.classList.remove('active'));
+        const section = $('tool-' + target);
+        if (section) section.classList.add('active');
+      });
     });
 
-    if (thisOperation !== operationId) return;
+    // PDF TOOLKIT SUB-TABS
+    document.querySelectorAll('.pdftool-subtab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.pdftool-subtab').forEach(t => {
+          t.classList.remove('active');
+          t.style.background = 'white';
+          t.style.color = 'var(--slate-700)';
+          t.style.border = '1px solid var(--slate-300)';
+        });
+        tab.classList.add('active');
+        tab.style.background = 'var(--primary)';
+        tab.style.color = 'white';
+        tab.style.border = 'none';
+        document.querySelectorAll('.pdftool-panel').forEach(p => p.classList.add('hidden'));
+        const panel = $('pdftool-' + tab.dataset.subtab);
+        if (panel) panel.classList.remove('hidden');
+      });
+    });
 
-    const canvas = drawImageToCanvas(img, preset.width, preset.height);
-    const result = await findBestCompression(canvas, preset);
+    // COMPRESSOR ENGINE
+    const elC = {
+      input: $("file-input"),
+      zone: $("drop-zone"),
+      sourceInfo: $("source-info"),
+      sourceName: $("source-name"),
+      sourceMeta: $("source-meta"),
+      processButton: $("process-button"),
+      processLabel: $("process-label"),
+      spinner: $("process-spinner"),
+      emptyPreview: $("empty-preview"),
+      resultPanel: $("result-panel"),
+      errorPanel: $("error-panel"),
+      originalPreview: $("original-preview"),
+      resultPreview: $("result-preview"),
+      originalDetails: $("original-details"),
+      resultDetails: $("result-details"),
+      statusCard: $("status-card"),
+      statusIcon: $("status-icon"),
+      statusTitle: $("status-title"),
+      statusMessage: $("status-message"),
+      download: $("download-button"),
+      paywallModal: $("paywall-modal"),
+      donationModal: $("donation-modal"),
+      privacyModal: $("privacy-modal"),
+      creditCount: $("credit-count"),
+      countdownTimer: $("countdown-timer"),
+      payInitialStep: $("pay-initial-step"),
+      payQrStep: $("pay-qr-step"),
+      resetInTimer: $("reset-in-timer"),
+      dynamicQrImg: $("dynamic-qr-img"),
+      utrInput: $("utr-input"),
+      utrError: $("utr-error"),
+      paidVerifyBtn: $("paid-verify-button"),
+      utrVerifyLabel: $("utr-verify-label"),
+      utrVerifySpinner: $("utr-verify-spinner")
+    };
 
-    if (thisOperation !== operationId) return;
+    let mode = "passport";
+    let selectedFile = null;
+    let originalURL = null;
+    let resultURL = null;
+    let currentBlob = null;
+    let isProcessing = false;
+    let operationId = 0;
+    let countdownInterval = null;
+    let selectedPlanType = 'single';
 
-    currentBlob = result.blob;
-    if (resultURL) URL.revokeObjectURL(resultURL);
-    resultURL = URL.createObjectURL(result.blob);
+    $("open-privacy-btn").addEventListener("click", () => elC.privacyModal.classList.remove("hidden"));
+    $("close-privacy-btn").addEventListener("click", () => elC.privacyModal.classList.add("hidden"));
+    $("close-privacy-btn-bottom").addEventListener("click", () => elC.privacyModal.classList.add("hidden"));
 
-    el.resultPreview.src = resultURL;
-    el.resultDetails.textContent = `${preset.width} × ${preset.height} px · ${formatBytes(result.blob.size)}`;
-    el.resultPanel.classList.remove("hidden");
-    el.emptyPreview.classList.add("hidden");
-
-    if (result.compliant) {
-      el.statusCard.className = "mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3";
-      el.statusIcon.textContent = "✓";
-      el.statusTitle.textContent = "Standard exam size achieved";
-      el.statusTitle.className = "text-sm font-bold text-emerald-800";
-      el.statusMessage.textContent = `${formatBytes(result.blob.size)} — Form ready.`;
-    } else {
-      el.statusCard.className = "mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3";
-      el.statusIcon.textContent = "!";
-      el.statusTitle.textContent = "Target file size not achieved";
-      el.statusTitle.className = "text-sm font-bold text-amber-800";
-      el.statusMessage.textContent = `Output is ${formatBytes(result.blob.size)}. Try another photo.`;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("mode") === "signature") setMode("signature");
+    if (urlParams.get("tab")) {
+      const tabBtn = document.querySelector(`.nav-tab[data-tab="${urlParams.get("tab")}"]`);
+      if (tabBtn) tabBtn.click();
     }
 
-  } catch (err) {
-    showError(err.message || "Failed to process image.");
-  } finally {
-    if (tempURL) URL.revokeObjectURL(tempURL);
-    if (thisOperation === operationId) setProcessing(false);
-  }
-});
-</script>
+    // 10-Click VIP Bypass
+    let adminClicks = 0;
+    let clickResetTimer = null;
+    $("admin-secret-logo").addEventListener("click", function (e) {
+      e.preventDefault();
+      adminClicks++;
+      this.style.transform = "scale(0.92)";
+      setTimeout(() => { this.style.transform = "scale(1)"; }, 100);
+      clearTimeout(clickResetTimer);
+      clickResetTimer = setTimeout(() => { adminClicks = 0; }, 8000);
+      if (adminClicks >= 10) {
+        adminClicks = 0;
+        clearTimeout(clickResetTimer);
+        $("owner-vip-modal").classList.remove("hidden");
+      }
+    });
 
-<!-- Adsterra Social Bar Ad Unit -->
-<script data-cfasync="false" src="https://bauval.org/14/b94b7523d8994e72f4858a3fdbf64369"></script>
+    $("confirm-owner-btn").addEventListener("click", () => {
+      localStorage.setItem("examready_is_admin", "true");
+      localStorage.setItem("examready_is_pro", "true");
+      $("owner-vip-modal").classList.add("hidden");
+      updateStatusUI();
+      alert("VIP Pass Activated permanently!");
+    });
+
+    function isCreatorAdmin() { return localStorage.getItem("examready_is_admin") === "true"; }
+
+    function checkExpiryAndReset() {
+      if (isCreatorAdmin()) return;
+      const now = Date.now();
+      const monthlyExpiry = localStorage.getItem("examready_monthly_expiry");
+      if (monthlyExpiry && now > parseInt(monthlyExpiry, 10)) {
+        localStorage.removeItem("examready_monthly_expiry");
+        localStorage.removeItem("examready_is_pro");
+      }
+      const lastReset = localStorage.getItem("examready_last_reset");
+      if (!lastReset) {
+        localStorage.setItem("examready_last_reset", now.toString());
+        localStorage.setItem("examready_usage_count", "0");
+      } else if (now - parseInt(lastReset, 10) >= RESET_MS) {
+        localStorage.setItem("examready_usage_count", "0");
+        localStorage.setItem("examready_last_reset", now.toString());
+      }
+    }
+
+    function isProActive() {
+      if (isCreatorAdmin()) return { active: true, type: "admin" };
+      checkExpiryAndReset();
+      const monthlyExpiry = localStorage.getItem("examready_monthly_expiry");
+      if (monthlyExpiry && Date.now() <= parseInt(monthlyExpiry, 10)) return { active: true, type: "monthly" };
+      if (localStorage.getItem("examready_is_pro") === "true") return { active: true, type: "pass" };
+      return { active: false };
+    }
+
+    function getUsageCount() { return parseInt(localStorage.getItem("examready_usage_count") || "0", 10); }
+
+    function getTimeUntilReset() {
+      const lastReset = parseInt(localStorage.getItem("examready_last_reset") || Date.now().toString(), 10);
+      const remainingMs = Math.max(0, RESET_MS - (Date.now() - lastReset));
+      const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+      const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+      return `${hours}h ${minutes}m`;
+    }
+
+    function updateStatusUI() {
+      checkExpiryAndReset();
+      const pro = isProActive();
+      const badge = $("status-badge");
+      if (pro.active) {
+        if (pro.type === "admin") {
+          badge.className = "status-badge admin";
+          badge.innerHTML = "👑 Creator VIP (Unlimited Free)";
+        } else if (pro.type === "monthly") {
+          const exp = parseInt(localStorage.getItem("examready_monthly_expiry"), 10);
+          const daysLeft = Math.ceil((exp - Date.now()) / (1000 * 60 * 60 * 24));
+          badge.className = "status-badge pro";
+          badge.innerHTML = `★ 1 Month Pass (${daysLeft}d left)`;
+        } else {
+          badge.className = "status-badge pro";
+          badge.innerHTML = "★ Unlimited Pro Pass";
+        }
+        return;
+      }
+      const remaining = Math.max(0, MAX_FREE_USAGE - getUsageCount());
+      elC.creditCount.textContent = remaining;
+      badge.innerHTML = `Free: <span id="credit-count">${remaining}</span> left (24h)`;
+      badge.className = remaining === 0 ? "status-badge exhausted" : "status-badge free";
+    }
+    updateStatusUI();
+
+    function getCurrentSinglePrice() { return localStorage.getItem("examready_paid_once") === "true" ? 29 : 19; }
+
+    window.selectPlan = function(type) {
+      selectedPlanType = type;
+      const singleCard = $("plan-single-card");
+      const monthCard = $("plan-month-card");
+      const price = getCurrentSinglePrice();
+      if (type === 'single') {
+        singleCard.classList.add('selected');
+        monthCard.classList.remove('selected');
+        $("btn-pay-amount").textContent = `₹${price}`;
+      } else {
+        monthCard.classList.add('selected');
+        singleCard.classList.remove('selected');
+        $("btn-pay-amount").textContent = `₹129`;
+      }
+    };
+
+    function showPaywall() {
+      checkExpiryAndReset();
+      const price = getCurrentSinglePrice();
+      $("single-plan-price").textContent = `₹${price}`;
+      $("single-plan-title").textContent = (price === 19) ? "Starter Exam Pass" : "Power Exam Pass";
+      $("reset-in-timer").textContent = getTimeUntilReset();
+      window.selectPlan('single');
+      elC.payInitialStep.classList.remove("hidden");
+      elC.payQrStep.classList.add("hidden");
+      $("verification-pending-msg").classList.add("hidden");
+      elC.paywallModal.classList.remove("hidden");
+    }
+
+    function startTimer(durationSeconds) {
+      clearInterval(countdownInterval);
+      let timer = durationSeconds;
+      function updateDisplay() {
+        let minutes = Math.floor(timer / 60);
+        let seconds = timer % 60;
+        elC.countdownTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
+      updateDisplay();
+      countdownInterval = setInterval(() => {
+        timer--;
+        if (timer < 0) timer = 120;
+        updateDisplay();
+      }, 1000);
+    }
+
+    $("show-qr-btn").addEventListener("click", () => {
+      const amount = (selectedPlanType === 'single') ? getCurrentSinglePrice() : 129;
+      const upiUrl = `upi://pay?pa=${UPI_ID}&pn=ExamReady&am=${amount}&cu=INR`;
+      elC.dynamicQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUrl)}`;
+      elC.utrInput.value = "";
+      elC.utrError.classList.add("hidden");
+      $("verification-pending-msg").classList.add("hidden");
+      elC.payInitialStep.classList.add("hidden");
+      elC.payQrStep.classList.remove("hidden");
+      startTimer(120);
+    });
+
+    $("back-to-plans-btn").addEventListener("click", () => {
+      clearInterval(countdownInterval);
+      elC.payQrStep.classList.add("hidden");
+      elC.payInitialStep.classList.remove("hidden");
+    });
+
+    $("close-modal-btn").addEventListener("click", () => {
+      elC.paywallModal.classList.add("hidden");
+      clearInterval(countdownInterval);
+    });
+
+    elC.paidVerifyBtn.addEventListener("click", () => {
+      const utr = elC.utrInput.value.trim();
+      if (!/^\d{12}$/.test(utr) || utr === "000000000000" || utr === "123456789012") {
+        elC.utrError.classList.remove("hidden");
+        elC.utrInput.focus();
+        return;
+      }
+      elC.utrError.classList.add("hidden");
+      elC.paidVerifyBtn.disabled = true;
+      elC.utrVerifySpinner.classList.remove("hidden");
+      elC.utrVerifyLabel.textContent = "Submitting UTR Reference...";
+
+      setTimeout(() => {
+        elC.paidVerifyBtn.disabled = false;
+        elC.utrVerifySpinner.classList.add("hidden");
+        elC.utrVerifyLabel.textContent = "Submit for Manual Verification";
+        localStorage.setItem("examready_last_utr", utr);
+        localStorage.setItem("examready_utr_submitted_at", Date.now().toString());
+        $("verification-pending-msg").classList.remove("hidden");
+      }, 1200);
+    });
+
+    $("open-donation-btn").addEventListener("click", () => elC.donationModal.classList.remove("hidden"));
+    $("close-donation-btn").addEventListener("click", () => elC.donationModal.classList.add("hidden"));
+
+    function formatBytes(bytes) {
+      if (bytes < 1024) return `${bytes} bytes`;
+      if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
+      return `${(bytes / 1048576).toFixed(1)} MB`;
+    }
+
+    function getPreset() { return PRESETS[mode]; }
+
+    function clearResult() {
+      if (resultURL) URL.revokeObjectURL(resultURL);
+      resultURL = null;
+      currentBlob = null;
+      elC.resultPreview.removeAttribute("src");
+      elC.resultPanel.classList.add("hidden");
+      elC.emptyPreview.classList.remove("hidden");
+    }
+
+    function showError(message) {
+      elC.errorPanel.textContent = message;
+      elC.errorPanel.classList.remove("hidden");
+    }
+
+    function clearError() {
+      elC.errorPanel.textContent = "";
+      elC.errorPanel.classList.add("hidden");
+    }
+
+    function setProcessing(active) {
+      isProcessing = active;
+      elC.processButton.disabled = active || !selectedFile;
+      elC.spinner.classList.toggle("hidden", !active);
+      elC.processLabel.textContent = active ? "Optimizing image…" : "Optimize Image";
+    }
+
+    function setMode(newMode) {
+      if (!PRESETS[newMode]) return;
+      mode = newMode;
+      operationId++;
+      const passport = mode === "passport";
+      $("passport-mode").classList.toggle("active", passport);
+      $("signature-mode").classList.toggle("active", !passport);
+      clearResult();
+      clearError();
+      setProcessing(false);
+      if (selectedFile) {
+        elC.sourceMeta.textContent = `${formatBytes(selectedFile.size)} · Output ${getPreset().width} × ${getPreset().height} px`;
+      }
+    }
+
+    $("passport-mode").addEventListener("click", () => setMode("passport"));
+    $("signature-mode").addEventListener("click", () => setMode("signature"));
+
+    function acceptFile(file) {
+      if (!file) return;
+      clearError();
+      const supportedTypes = ["image/jpeg", "image/png", "image/webp"];
+      if (!supportedTypes.includes(file.type)) {
+        showError("Unsupported file type. Please select a JPG, PNG or WebP image.");
+        return;
+      }
+      if (file.size > MAX_FILE_BYTES) {
+        showError("The image exceeds the 20 MB limit.");
+        return;
+      }
+      operationId++;
+      setProcessing(false);
+      clearResult();
+      if (originalURL) URL.revokeObjectURL(originalURL);
+      selectedFile = file;
+      originalURL = URL.createObjectURL(file);
+      elC.sourceName.textContent = file.name;
+      elC.sourceMeta.textContent = `${formatBytes(file.size)} · Output ${getPreset().width} × ${getPreset().height} px`;
+      elC.sourceInfo.classList.remove("hidden");
+      elC.originalPreview.src = originalURL;
+      elC.originalDetails.textContent = formatBytes(file.size);
+      elC.processButton.disabled = false;
+    }
+
+    elC.input.addEventListener("change", e => acceptFile(e.target.files[0]));
+    $("remove-file").addEventListener("click", () => {
+      selectedFile = null;
+      elC.input.value = "";
+      elC.sourceInfo.classList.add("hidden");
+      clearResult();
+      clearError();
+      setProcessing(false);
+    });
+
+    ["dragenter", "dragover"].forEach(n => {
+      elC.zone.addEventListener(n, e => { e.preventDefault(); elC.zone.classList.add("dragging"); });
+    });
+    ["dragleave", "drop"].forEach(n => {
+      elC.zone.addEventListener(n, e => { e.preventDefault(); elC.zone.classList.remove("dragging"); });
+    });
+    elC.zone.addEventListener("drop", e => acceptFile(e.dataTransfer?.files?.[0]));
+
+    function drawImageToCanvas(image, width, height) {
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d", { alpha: false });
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+      const sw = image.naturalWidth;
+      const sh = image.naturalHeight;
+      const sourceRatio = sw / sh;
+      const targetRatio = width / height;
+      let cw = sw, ch = sh, cx = 0, cy = 0;
+      if (sourceRatio > targetRatio) {
+        cw = sh * targetRatio;
+        cx = (sw - cw) / 2;
+      } else {
+        ch = sw / targetRatio;
+        cy = (sh - ch) / 2;
+      }
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(image, cx, cy, cw, ch, 0, 0, width, height);
+      return canvas;
+    }
+
+    function canvasToBlob(canvas, quality) {
+      return new Promise(resolve => canvas.toBlob(blob => resolve(blob), "image/jpeg", quality));
+    }
+
+    async function findBestCompression(canvas, preset) {
+      const minBytes = preset.minKB * 1024;
+      const maxBytes = preset.maxKB * 1024;
+      let smallestBlob = null;
+      let smallestQuality = 0.1;
+      for (let step = 0; step <= 40; step++) {
+        const quality = Math.round((0.9 - step * 0.02) * 100) / 100;
+        const blob = await canvasToBlob(canvas, quality);
+        if (!smallestBlob || blob.size < smallestBlob.size) {
+          smallestBlob = blob;
+          smallestQuality = quality;
+        }
+        if (blob.size >= minBytes && blob.size <= maxBytes) {
+          return { blob, quality, compliant: true };
+        }
+      }
+      return { blob: smallestBlob, quality: smallestQuality, compliant: !!smallestBlob && smallestBlob.size >= minBytes && smallestBlob.size <= maxBytes };
+    }
+
+    function triggerDirectDownload() {
+      if (!currentBlob) return;
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(currentBlob);
+      a.download = getPreset().filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    elC.download.addEventListener("click", () => {
+      checkExpiryAndReset();
+      const pro = isProActive();
+      const currentUsage = getUsageCount();
+
+      if (!isCreatorAdmin() && ADSTERRA_DIRECT_LINK && currentUsage >= 1) {
+        window.open(ADSTERRA_DIRECT_LINK, "_blank");
+      }
+
+      if (pro.active) {
+        triggerDirectDownload();
+        return;
+      }
+
+      if (currentUsage >= MAX_FREE_USAGE) {
+        showPaywall();
+      } else {
+        localStorage.setItem("examready_usage_count", (currentUsage + 1).toString());
+        updateStatusUI();
+        triggerDirectDownload();
+      }
+    });
+
+    elC.processButton.addEventListener("click", async () => {
+      if (!selectedFile || isProcessing) return;
+      checkExpiryAndReset();
+      const pro = isProActive();
+      if (!pro.active && getUsageCount() >= MAX_FREE_USAGE) {
+        showPaywall();
+        return;
+      }
+      const file = selectedFile;
+      const preset = getPreset();
+      const thisOperation = ++operationId;
+      clearError();
+      clearResult();
+      setProcessing(true);
+
+      let tempURL = null;
+      try {
+        tempURL = URL.createObjectURL(file);
+        const img = new Image();
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error("Unable to open image."));
+          img.src = tempURL;
+        });
+
+        if (thisOperation !== operationId) return;
+        const canvas = drawImageToCanvas(img, preset.width, preset.height);
+        const result = await findBestCompression(canvas, preset);
+        if (thisOperation !== operationId) return;
+
+        currentBlob = result.blob;
+        if (resultURL) URL.revokeObjectURL(resultURL);
+        resultURL = URL.createObjectURL(result.blob);
+
+        elC.resultPreview.src = resultURL;
+        elC.resultDetails.textContent = `${preset.width} × ${preset.height} px · ${formatBytes(result.blob.size)}`;
+        elC.resultPanel.classList.remove("hidden");
+        elC.emptyPreview.classList.add("hidden");
+
+        if (result.compliant) {
+          elC.statusCard.className = "status-card success";
+          elC.statusIcon.textContent = "✓";
+          elC.statusTitle.textContent = "Standard exam size achieved";
+          elC.statusMessage.textContent = `${formatBytes(result.blob.size)} — Form ready.`;
+        } else {
+          elC.statusCard.className = "status-card warning";
+          elC.statusIcon.textContent = "!";
+          elC.statusTitle.textContent = "Target file size not achieved";
+          elC.statusMessage.textContent = `Output is ${formatBytes(result.blob.size)}. Try another photo.`;
+        }
+      } catch (err) {
+        showError(err.message || "Failed to process image.");
+      } finally {
+        if (tempURL) URL.revokeObjectURL(tempURL);
+        if (thisOperation === operationId) setProcessing(false);
+      }
+    });
+
+    // TOOL 2: IMAGE TO PDF
+    const img2pdfState = { images: [], pdfBlob: null, idCounter: 0 };
+    const img2pdfInput = $("img2pdf-input");
+    const img2pdfDropzone = $("img2pdf-dropzone");
+
+    function img2pdfRenderPreviews() {
+      const grid = $("img2pdf-preview-grid");
+      const area = $("img2pdf-preview-area");
+      const btn = $("img2pdf-generate");
+      if (img2pdfState.images.length === 0) {
+        area.classList.add("hidden");
+        btn.disabled = true;
+        return;
+      }
+      area.classList.remove("hidden");
+      btn.disabled = false;
+      $("img2pdf-count").textContent = img2pdfState.images.length;
+      grid.innerHTML = "";
+      img2pdfState.images.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "img-preview-item";
+        div.innerHTML = `
+          <img src="${item.url}" alt="Image ${index + 1}">
+          <button type="button" class="img-remove-btn" data-id="${item.id}">✕</button>
+          <span class="img-order">${index + 1}</span>
+        `;
+        grid.appendChild(div);
+      });
+
+      grid.querySelectorAll(".img-remove-btn").forEach(b => {
+        b.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const id = parseInt(b.dataset.id);
+          const idx = img2pdfState.images.findIndex(i => i.id === id);
+          if (idx >= 0) {
+            URL.revokeObjectURL(img2pdfState.images[idx].url);
+            img2pdfState.images.splice(idx, 1);
+            img2pdfRenderPreviews();
+          }
+        });
+      });
+    }
+
+    function img2pdfAddFiles(files) {
+      for (const file of files) {
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) continue;
+        const url = URL.createObjectURL(file);
+        img2pdfState.images.push({ file, url, id: ++img2pdfState.idCounter });
+      }
+      img2pdfRenderPreviews();
+    }
+
+    img2pdfInput.addEventListener("change", e => { img2pdfAddFiles(e.target.files); img2pdfInput.value = ""; });
+    ["dragenter", "dragover"].forEach(n => { img2pdfDropzone.addEventListener(n, e => { e.preventDefault(); img2pdfDropzone.classList.add("dragging"); }); });
+    ["dragleave", "drop"].forEach(n => { img2pdfDropzone.addEventListener(n, e => { e.preventDefault(); img2pdfDropzone.classList.remove("dragging"); }); });
+    img2pdfDropzone.addEventListener("drop", e => { if (e.dataTransfer?.files) img2pdfAddFiles(e.dataTransfer.files); });
+    $("img2pdf-clear-all").addEventListener("click", () => {
+      img2pdfState.images.forEach(i => URL.revokeObjectURL(i.url));
+      img2pdfState.images = [];
+      img2pdfRenderPreviews();
+    });
+
+    const PAGE_SIZES = { a4: [595.28, 841.89], letter: [612, 792], legal: [612, 1008], a3: [841.89, 1190.55] };
+
+    $("img2pdf-generate").addEventListener("click", async () => {
+      if (img2pdfState.images.length === 0 || typeof PDFLib === 'undefined') return;
+      $("img2pdf-error").classList.add("hidden");
+      $("img2pdf-spinner").classList.remove("hidden");
+      $("img2pdf-label").textContent = "Generating PDF...";
+      $("img2pdf-generate").disabled = true;
+
+      try {
+        const pdfDoc = await PDFLib.PDFDocument.create();
+        const pageSize = $("img2pdf-pagesize").value;
+        const orientation = $("img2pdf-orientation").value;
+        const margin = parseInt($("img2pdf-margin").value) || 0;
+
+        for (const item of img2pdfState.images) {
+          const arrayBuffer = await item.file.arrayBuffer();
+          let embeddedImg;
+          if (item.file.type === "image/png") {
+            embeddedImg = await pdfDoc.embedPng(arrayBuffer);
+          } else {
+            embeddedImg = await pdfDoc.embedJpg(arrayBuffer);
+          }
+          const imgWidth = embeddedImg.width;
+          const imgHeight = embeddedImg.height;
+
+          let pw, ph;
+          if (pageSize === 'fit') {
+            pw = imgWidth + margin * 2;
+            ph = imgHeight + margin * 2;
+          } else {
+            [pw, ph] = PAGE_SIZES[pageSize];
+            if (orientation === 'landscape') [pw, ph] = [ph, pw];
+            else if (orientation === 'auto' && imgWidth > imgHeight && pw < ph) [pw, ph] = [ph, pw];
+          }
+
+          const page = pdfDoc.addPage([pw, ph]);
+          const availW = pw - margin * 2;
+          const availH = ph - margin * 2;
+          const scale = Math.min(availW / imgWidth, availH / imgHeight, 1);
+          page.drawImage(embeddedImg, {
+            x: margin + (availW - imgWidth * scale) / 2,
+            y: margin + (availH - imgHeight * scale) / 2,
+            width: imgWidth * scale,
+            height: imgHeight * scale
+          });
+        }
+
+        const pdfBytes = await pdfDoc.save();
+        img2pdfState.pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
+        $("img2pdf-empty").classList.add("hidden");
+        $("img2pdf-result").classList.remove("hidden");
+        $("img2pdf-result-info").textContent = `${img2pdfState.images.length} pages · ${formatBytes(pdfBytes.length)}`;
+      } catch (err) {
+        $("img2pdf-error").textContent = `Error: ${err.message || "Failed to generate PDF."}`;
+        $("img2pdf-error").classList.remove("hidden");
+      } finally {
+        $("img2pdf-spinner").classList.add("hidden");
+        $("img2pdf-label").textContent = "Generate PDF";
+        $("img2pdf-generate").disabled = img2pdfState.images.length === 0;
+      }
+    });
+
+    $("img2pdf-download").addEventListener("click", () => {
+      if (!img2pdfState.pdfBlob) return;
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(img2pdfState.pdfBlob);
+      a.download = "examready-images.pdf";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+
+    // TOOL 3: PDF MERGE, SPLIT & COMPRESS
+    const mergeState = { files: [], resultBlob: null, idCounter: 0 };
+    const mergeInput = $("merge-input");
+
+    function mergeRenderFiles() {
+      const list = $("merge-file-list");
+      const area = $("merge-file-list-area");
+      const btn = $("merge-btn");
+      if (mergeState.files.length === 0) {
+        area.classList.add("hidden");
+        btn.disabled = true;
+        return;
+      }
+      area.classList.remove("hidden");
+      btn.disabled = mergeState.files.length < 2;
+      $("merge-file-count").textContent = mergeState.files.length;
+      list.innerHTML = "";
+      mergeState.files.forEach((item) => {
+        const li = document.createElement("li");
+        li.className = "pdf-file-item";
+        li.innerHTML = `
+          <span class="pdf-file-grip">⠿</span>
+          <span style="font-size: 20px;">📄</span>
+          <div class="pdf-file-info">
+            <div class="pdf-file-name">${item.file.name}</div>
+            <div class="pdf-file-size">${formatBytes(item.file.size)}</div>
+          </div>
+          <button type="button" class="pdf-file-remove" data-id="${item.id}">✕</button>
+        `;
+        list.appendChild(li);
+      });
+      list.querySelectorAll(".pdf-file-remove").forEach(b => {
+        b.addEventListener("click", () => {
+          const id = parseInt(b.dataset.id);
+          mergeState.files = mergeState.files.filter(f => f.id !== id);
+          mergeRenderFiles();
+        });
+      });
+    }
+
+    mergeInput.addEventListener("change", e => {
+      for (const file of e.target.files) {
+        if (file.type === "application/pdf") mergeState.files.push({ file, id: ++mergeState.idCounter });
+      }
+      mergeRenderFiles();
+      mergeInput.value = "";
+    });
+
+    $("merge-clear-all").addEventListener("click", () => {
+      mergeState.files = [];
+      mergeRenderFiles();
+    });
+
+    $("merge-btn").addEventListener("click", async () => {
+      if (mergeState.files.length < 2 || typeof PDFLib === 'undefined') return;
+      $("merge-error").classList.add("hidden");
+      $("merge-spinner").classList.remove("hidden");
+      $("merge-label").textContent = "Merging...";
+      $("merge-btn").disabled = true;
+
+      try {
+        const merged = await PDFLib.PDFDocument.create();
+        let totalPages = 0;
+        for (const item of mergeState.files) {
+          const buf = await item.file.arrayBuffer();
+          const src = await PDFLib.PDFDocument.load(buf, { ignoreEncryption: true });
+          const pages = await merged.copyPages(src, src.getPageIndices());
+          pages.forEach(p => merged.addPage(p));
+          totalPages += pages.length;
+        }
+        const pdfBytes = await merged.save();
+        mergeState.resultBlob = new Blob([pdfBytes], { type: "application/pdf" });
+        $("merge-empty").classList.add("hidden");
+        $("merge-result").classList.remove("hidden");
+        $("merge-result-info").textContent = `${mergeState.files.length} files · ${totalPages} pages · ${formatBytes(pdfBytes.length)}`;
+      } catch (err) {
+        $("merge-error").textContent = err.message || "Failed to merge PDFs.";
+        $("merge-error").classList.remove("hidden");
+      } finally {
+        $("merge-spinner").classList.add("hidden");
+        $("merge-label").textContent = "Merge PDFs";
+        $("merge-btn").disabled = mergeState.files.length < 2;
+      }
+    });
+
+    $("merge-download").addEventListener("click", () => {
+      if (!mergeState.resultBlob) return;
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(mergeState.resultBlob);
+      a.download = "examready-merged.pdf";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+
+    // SPLIT LOGIC
+    const splitState = { file: null, pdfDoc: null, totalPages: 0, resultBlobs: [] };
+    const splitInput = $("split-input");
+
+    splitInput.addEventListener("change", async e => {
+      const file = e.target.files[0];
+      if (!file || file.type !== "application/pdf") return;
+      splitInput.value = "";
+      splitState.file = file;
+      try {
+        const buf = await file.arrayBuffer();
+        const doc = await PDFLib.PDFDocument.load(buf, { ignoreEncryption: true });
+        splitState.pdfDoc = doc;
+        splitState.totalPages = doc.getPageCount();
+        $("split-file-name").textContent = file.name;
+        $("split-file-meta").textContent = `${formatBytes(file.size)} · ${splitState.totalPages} pages`;
+        $("split-file-info").classList.remove("hidden");
+        $("split-options").classList.remove("hidden");
+        $("split-btn").disabled = false;
+        $("split-ranges").value = "";
+        $("split-ranges").placeholder = `e.g. 1-${Math.min(3, splitState.totalPages)}, ${Math.min(5, splitState.totalPages)}`;
+      } catch (err) {
+        $("split-error").textContent = `Could not read PDF: ${err.message}`;
+        $("split-error").classList.remove("hidden");
+      }
+    });
+
+    $("split-remove").addEventListener("click", () => {
+      splitState.file = null;
+      $("split-file-info").classList.add("hidden");
+      $("split-options").classList.add("hidden");
+      $("split-btn").disabled = true;
+    });
+
+    function parsePageRanges(rangeStr, totalPages) {
+      const ranges = [];
+      const parts = rangeStr.split(",").map(s => s.trim()).filter(Boolean);
+      for (const part of parts) {
+        const match = part.match(/^(\d+)\s*-\s*(\d+)$/);
+        if (match) {
+          const start = parseInt(match[1]);
+          const end = parseInt(match[2]);
+          if (start < 1 || end > totalPages || start > end) throw new Error(`Invalid range: ${part}`);
+          const pages = [];
+          for (let i = start; i <= end; i++) pages.push(i - 1);
+          ranges.push({ label: `${start}-${end}`, pages });
+        } else if (/^\d+$/.test(part)) {
+          const page = parseInt(part);
+          if (page < 1 || page > totalPages) throw new Error(`Invalid page: ${part}`);
+          ranges.push({ label: `${page}`, pages: [page - 1] });
+        }
+      }
+      if (ranges.length === 0) throw new Error("Enter valid page ranges.");
+      return ranges;
+    }
+
+    $("split-btn").addEventListener("click", async () => {
+      if (!splitState.file) return;
+      const rangeStr = $("split-ranges").value.trim();
+      if (!rangeStr) return;
+      $("split-error").classList.add("hidden");
+      $("split-spinner").classList.remove("hidden");
+      $("split-label").textContent = "Splitting...";
+      $("split-btn").disabled = true;
+
+      try {
+        const ranges = parsePageRanges(rangeStr, splitState.totalPages);
+        splitState.resultBlobs = [];
+        const srcBuf = await splitState.file.arrayBuffer();
+
+        for (const range of ranges) {
+          const srcDoc = await PDFLib.PDFDocument.load(srcBuf, { ignoreEncryption: true });
+          const newDoc = await PDFLib.PDFDocument.create();
+          const copiedPages = await newDoc.copyPages(srcDoc, range.pages);
+          copiedPages.forEach(p => newDoc.addPage(p));
+          const bytes = await newDoc.save();
+          const blob = new Blob([bytes], { type: "application/pdf" });
+          const baseName = splitState.file.name.replace(/\.pdf$/i, "");
+          splitState.resultBlobs.push({ blob, name: `${baseName}_pages_${range.label}.pdf`, pages: range.label });
+        }
+
+        const resultList = $("split-result-list");
+        resultList.innerHTML = "";
+        splitState.resultBlobs.forEach((item, i) => {
+          const div = document.createElement("div");
+          div.className = "file-info";
+          div.style.marginBottom = "8px";
+          div.innerHTML = `
+            <div class="file-info-text">
+              <p class="file-info-name">${item.name}</p>
+              <p class="file-info-meta">Pages: ${item.pages} · ${formatBytes(item.blob.size)}</p>
+            </div>
+            <button type="button" class="btn btn-xs btn-primary split-dl-btn" data-index="${i}" style="width:auto;">↓</button>
+          `;
+          resultList.appendChild(div);
+        });
+
+        resultList.querySelectorAll(".split-dl-btn").forEach(b => {
+          b.addEventListener("click", () => {
+            const item = splitState.resultBlobs[parseInt(b.dataset.index)];
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(item.blob);
+            a.download = item.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          });
+        });
+
+        $("split-empty").classList.add("hidden");
+        $("split-result").classList.remove("hidden");
+      } catch (err) {
+        $("split-error").textContent = err.message || "Failed to split PDF.";
+        $("split-error").classList.remove("hidden");
+      } finally {
+        $("split-spinner").classList.add("hidden");
+        $("split-label").textContent = "Split PDF";
+        $("split-btn").disabled = false;
+      }
+    });
+
+    $("split-download-all").addEventListener("click", async () => {
+      if (splitState.resultBlobs.length === 0 || typeof JSZip === 'undefined') return;
+      const zip = new JSZip();
+      splitState.resultBlobs.forEach(item => zip.file(item.name, item.blob));
+      const content = await zip.generateAsync({ type: "blob" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(content);
+      a.download = "examready-split-pdfs.zip";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+
+    // COMPRESS LOGIC
+    const compressState = { file: null, resultBlob: null };
+    const compressInput = $("compress-input");
+
+    compressInput.addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file || file.type !== "application/pdf") return;
+      compressInput.value = "";
+      compressState.file = file;
+      $("compress-file-name").textContent = file.name;
+      $("compress-file-meta").textContent = formatBytes(file.size);
+      $("compress-file-info").classList.remove("hidden");
+      $("compress-btn").disabled = false;
+    });
+
+    $("compress-remove").addEventListener("click", () => {
+      compressState.file = null;
+      $("compress-file-info").classList.add("hidden");
+      $("compress-btn").disabled = true;
+    });
+
+    $("compress-btn").addEventListener("click", async () => {
+      if (!compressState.file || typeof PDFLib === 'undefined') return;
+      $("compress-error").classList.add("hidden");
+      $("compress-spinner").classList.remove("hidden");
+      $("compress-label").textContent = "Compressing...";
+      $("compress-btn").disabled = true;
+
+      try {
+        const originalSize = compressState.file.size;
+        const buf = await compressState.file.arrayBuffer();
+        const doc = await PDFLib.PDFDocument.load(buf, { ignoreEncryption: true });
+        const pdfBytes = await doc.save({ useObjectStreams: true, addDefaultPage: false });
+        compressState.resultBlob = new Blob([pdfBytes], { type: "application/pdf" });
+        const newSize = pdfBytes.length;
+
+        $("compress-empty").classList.add("hidden");
+        $("compress-result").classList.remove("hidden");
+        $("compress-status-card").className = newSize >= originalSize ? "status-card warning" : "status-card success";
+        $("compress-result-info").textContent = `${formatBytes(originalSize)} → ${formatBytes(newSize)}`;
+      } catch (err) {
+        $("compress-error").textContent = err.message || "Failed to compress PDF.";
+        $("compress-error").classList.remove("hidden");
+      } finally {
+        $("compress-spinner").classList.add("hidden");
+        $("compress-label").textContent = "Compress PDF";
+        $("compress-btn").disabled = false;
+      }
+    });
+
+    $("compress-download").addEventListener("click", () => {
+      if (!compressState.resultBlob) return;
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(compressState.resultBlob);
+      a.download = "examready-compressed.pdf";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+
+    // TOOL 4: PDF TO IMAGE ENGINE
+    async function ensurePdfJsLoaded() {
+      if (window.pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        return true;
+      }
+      return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const check = setInterval(() => {
+          if (window.pdfjsLib) {
+            clearInterval(check);
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            resolve(true);
+          }
+          if (++attempts > 40) {
+            clearInterval(check);
+            reject(new Error("PDF.js library load timeout."));
+          }
+        }, 100);
+      });
+    }
+
+    const pdf2imgState = { file: null, totalPages: 0, resultImages: [] };
+    const pdf2imgInput = $("pdf2img-input");
+
+    pdf2imgInput.addEventListener("change", async e => {
+      const file = e.target.files[0];
+      if (!file || file.type !== "application/pdf") return;
+      pdf2imgInput.value = "";
+      pdf2imgState.file = file;
+
+      try {
+        await ensurePdfJsLoaded();
+        const buf = await file.arrayBuffer();
+        const doc = await pdfjsLib.getDocument({ data: buf }).promise;
+        pdf2imgState.totalPages = doc.numPages;
+
+        $("pdf2img-file-name").textContent = file.name;
+        $("pdf2img-file-meta").textContent = `${formatBytes(file.size)} · ${pdf2imgState.totalPages} pages`;
+        $("pdf2img-file-info").classList.remove("hidden");
+        $("pdf2img-options").classList.remove("hidden");
+        $("pdf2img-btn").disabled = false;
+      } catch (err) {
+        $("pdf2img-error").textContent = `Could not read PDF: ${err.message}`;
+        $("pdf2img-error").classList.remove("hidden");
+      }
+    });
+
+    $("pdf2img-remove").addEventListener("click", () => {
+      pdf2imgState.file = null;
+      $("pdf2img-file-info").classList.add("hidden");
+      $("pdf2img-options").classList.add("hidden");
+      $("pdf2img-btn").disabled = true;
+    });
+
+    $("pdf2img-btn").addEventListener("click", async () => {
+      if (!pdf2imgState.file) return;
+      await ensurePdfJsLoaded();
+
+      const format = $("pdf2img-format").value;
+      const scale = parseFloat($("pdf2img-dpi").value);
+      const rangeStr = $("pdf2img-ranges").value.trim();
+      const mimeType = format === "png" ? "image/png" : "image/jpeg";
+      const ext = format === "png" ? "png" : "jpg";
+
+      $("pdf2img-spinner").classList.remove("hidden");
+      $("pdf2img-label").textContent = "Converting...";
+      $("pdf2img-btn").disabled = true;
+      $("pdf2img-empty").classList.add("hidden");
+      $("pdf2img-progress").classList.remove("hidden");
+      $("pdf2img-result").classList.add("hidden");
+
+      try {
+        const buf = await pdf2imgState.file.arrayBuffer();
+        const doc = await pdfjsLib.getDocument({ data: buf }).promise;
+        const total = doc.numPages;
+
+        let pageNumbers = [];
+        if (rangeStr) {
+          const ranges = parsePageRanges(rangeStr, total);
+          const pageSet = new Set();
+          ranges.forEach(r => r.pages.forEach(p => pageSet.add(p)));
+          pageNumbers = [...pageSet].sort((a, b) => a - b);
+        } else {
+          pageNumbers = Array.from({ length: total }, (_, i) => i);
+        }
+
+        $("pdf2img-total").textContent = pageNumbers.length;
+        pdf2imgState.resultImages = [];
+
+        for (let i = 0; i < pageNumbers.length; i++) {
+          $("pdf2img-current").textContent = i + 1;
+          $("pdf2img-progress-bar").style.width = `${((i + 1) / pageNumbers.length * 100).toFixed(0)}%`;
+
+          const pageIdx = pageNumbers[i];
+          const page = await doc.getPage(pageIdx + 1);
+          const viewport = page.getViewport({ scale });
+
+          const canvas = document.createElement("canvas");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext("2d");
+
+          if (format === "jpeg") {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+          }
+
+          await page.render({ canvasContext: ctx, viewport }).promise;
+
+          const blob = await new Promise(r => canvas.toBlob(r, mimeType, 0.92));
+          const baseName = pdf2imgState.file.name.replace(/\.pdf$/i, "");
+          pdf2imgState.resultImages.push({
+            blob,
+            name: `${baseName}_page_${pageIdx + 1}.${ext}`,
+            pageNum: pageIdx + 1,
+            url: URL.createObjectURL(blob)
+          });
+        }
+
+        const grid = $("pdf2img-result-grid");
+        grid.innerHTML = "";
+        pdf2imgState.resultImages.forEach((item, i) => {
+          const div = document.createElement("div");
+          div.className = "result-download-item";
+          div.innerHTML = `
+            <img src="${item.url}" alt="Page ${item.pageNum}">
+            <div class="result-download-item-footer">
+              <span>Page ${item.pageNum}</span>
+              <button type="button" class="result-download-btn" data-index="${i}">↓ Save</button>
+            </div>
+          `;
+          grid.appendChild(div);
+        });
+
+        grid.querySelectorAll(".result-download-btn").forEach(b => {
+          b.addEventListener("click", () => {
+            const item = pdf2imgState.resultImages[parseInt(b.dataset.index)];
+            const a = document.createElement("a");
+            a.href = item.url;
+            a.download = item.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          });
+        });
+
+        $("pdf2img-progress").classList.add("hidden");
+        $("pdf2img-result").classList.remove("hidden");
+      } catch (err) {
+        $("pdf2img-error").textContent = err.message || "Failed to convert PDF.";
+        $("pdf2img-error").classList.remove("hidden");
+      } finally {
+        $("pdf2img-spinner").classList.add("hidden");
+        $("pdf2img-label").textContent = "Convert to Images";
+        $("pdf2img-btn").disabled = false;
+      }
+    });
+
+    $("pdf2img-download-all").addEventListener("click", async () => {
+      if (pdf2imgState.resultImages.length === 0 || typeof JSZip === 'undefined') return;
+      const zip = new JSZip();
+      pdf2imgState.resultImages.forEach(item => zip.file(item.name, item.blob));
+      const content = await zip.generateAsync({ type: "blob" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(content);
+      a.download = "examready-pdf-images.zip";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+  </script>
+
+  <!-- Adsterra Social Bar Ad Unit -->
+  <script data-cfasync="false" src="https://bauval.org/14/b94b7523d8994e72f4858a3fdbf64369"></script>
 
 </body>
 </html>
