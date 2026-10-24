@@ -1,8 +1,10 @@
-const CACHE_NAME = 'examready-v4';
+const CACHE_NAME = 'examready-v5';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/privacy.html',
+  '/robots.txt',
+  '/sitemap.xml',
   '/site.webmanifest',
   '/favicon.ico',
   '/apple-touch-icon.png',
