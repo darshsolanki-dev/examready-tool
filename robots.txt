@@ -6,5 +6,3 @@ Allow: /
 Disallow: /sw.js
 
 Sitemap: https://examready-tool.vercel.app/sitemap.xml
-```[cite: 45]
-* Niche **Commit changes** kar dein[cite: 45].
