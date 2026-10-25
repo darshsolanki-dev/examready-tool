@@ -5,12 +5,46 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <meta name="theme-color" content="#4f46e5">
-  <title>ExamReady — Photo Compressor, Image to PDF, PDF Tools | Free Online</title>
+  <title>Free Photo Compressor & Resizer for Exam Forms | Photo Compressor ExamReady</title>
   <meta name="description"
-    content="Free online photo compressor (20KB–50KB), image to PDF converter, PDF merge/split/compress, and PDF to image. Instant, private, in-browser tools for SSC, UPSC, Railway exam forms.">
+    content="Compress photos to KB sizes and resize photos and signatures for online exam forms. Free online photo compressor, image to PDF and PDF tools for students and applicants.">
   <meta name="keywords"
-    content="photo compressor, photo converter, photo mb to kb, image to pdf, pdf merge, pdf split, pdf compress, pdf to image, ssc photo resizer, sarkari photo resizer, exam photo tool">
+    content="photo compressor, photo compressor examready, examready, photo compressor for exam forms, exam photo resizer, signature resize for online forms, photo resize in kb, free online photo resizer, image to pdf, pdf compressor, photo converter, photo mb to kb, pdf merge, pdf split, ssc photo resizer, sarkari photo resizer, exam photo tool">
   <meta name="google-site-verification" content="0YcuwicVA8iD-HXQrXVZoGiYxso1DNrPqyInvMY0oc0" />
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://examready-tool.vercel.app/">
+
+  <!-- Open Graph Metadata -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Free Photo Compressor & Resizer for Exam Forms | Photo Compressor ExamReady">
+  <meta property="og:description"
+    content="Compress photos to KB sizes and resize photos and signatures for online exam forms. Free online photo compressor, image to PDF and PDF tools for students and applicants.">
+  <meta property="og:url" content="https://examready-tool.vercel.app/">
+  <meta property="og:site_name" content="Photo Compressor ExamReady">
+  <meta property="og:image" content="https://examready-tool.vercel.app/android-chrome-512x512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="Photo Compressor ExamReady logo">
+
+  <!-- Twitter Card Metadata -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Free Photo Compressor & Resizer for Exam Forms | Photo Compressor ExamReady">
+  <meta name="twitter:description"
+    content="Compress photos to KB sizes and resize photos and signatures for online exam forms. Free online photo compressor, image to PDF and PDF tools for students and applicants.">
+  <meta name="twitter:image" content="https://examready-tool.vercel.app/android-chrome-512x512.png">
+  <meta name="twitter:image:alt" content="Photo Compressor ExamReady logo">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Photo Compressor ExamReady",
+    "alternateName": "ExamReady Tool",
+    "url": "https://examready-tool.vercel.app/"
+  }
+  </script>
 
   <!-- Favicon & Brand Icons -->
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -40,7 +74,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
 
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     :root {
       --primary: #4f46e5;
       --primary-light: #eef2ff;
@@ -70,6 +111,7 @@
       --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
       --transition: 0.2s ease;
     }
+
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--slate-50);
@@ -80,146 +122,1044 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
-    @media (min-width: 640px) { .container { padding: 0 24px; } }
-    .hidden { display: none !important; }
-    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
-    .select-none { user-select: none; -webkit-user-select: none; }
-    .header { background: white; border-bottom: 1px solid var(--slate-200); position: sticky; top: 0; z-index: 40; }
-    .header-inner { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; gap: 12px; }
-    .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: transform 0.15s ease; }
-    .logo-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; box-shadow: var(--shadow-sm); flex-shrink: 0; }
-    .logo-text { font-size: 17px; font-weight: 800; color: var(--slate-900); line-height: 1.2; }
-    .logo-text span { color: var(--primary); }
-    .logo-sub { font-size: 11px; color: var(--slate-500); line-height: 1.2; }
-    .status-badge { border-radius: 20px; padding: 6px 14px; font-size: 11px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
-    .status-badge.free { background: var(--primary-light); color: var(--primary); border: 1px solid #c7d2fe; }
-    .status-badge.pro { background: var(--emerald-light); color: var(--emerald); border: 1px solid #a7f3d0; }
-    .status-badge.admin { background: var(--amber-light); color: #92400e; border: 1px solid #fde68a; }
-    .status-badge.exhausted { background: var(--rose-light); color: var(--rose); border: 1px solid #fecdd3; }
-    .nav-tabs { background: white; border-bottom: 1px solid var(--slate-200); overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-    .nav-tabs::-webkit-scrollbar { display: none; }
-    .nav-tabs-inner { display: flex; gap: 2px; padding: 8px 0 0; min-width: max-content; }
-    .nav-tab { padding: 10px 16px; font-size: 13px; font-weight: 600; color: var(--slate-500); background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; transition: var(--transition); display: flex; align-items: center; gap: 6px; }
-    .nav-tab:hover { color: var(--primary); background: var(--primary-light); }
-    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); }
-    .main { padding: 24px 0 40px; }
-    .tool-section { display: none; }
-    .tool-section.active { display: block; }
-    .section-header { text-align: center; margin-bottom: 24px; }
-    .section-badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 20px; background: var(--primary-light); padding: 6px 14px; font-size: 11px; font-weight: 600; color: var(--primary); margin-bottom: 12px; }
-    .section-title { font-size: 28px; font-weight: 800; color: var(--slate-900); line-height: 1.2; letter-spacing: -0.02em; }
-    .section-title span { color: var(--primary); }
-    .section-desc { margin-top: 12px; font-size: 14px; color: var(--slate-600); max-width: 600px; margin-left: auto; margin-right: auto; }
-    @media (min-width: 640px) { .section-title { font-size: 40px; } }
-    .card { background: white; border: 1px solid var(--slate-200); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-sm); }
-    @media (min-width: 640px) { .card { padding: 28px; } }
-    .card-title { font-size: 17px; font-weight: 700; color: var(--slate-900); }
-    .card-desc { font-size: 13px; color: var(--slate-500); margin-top: 4px; margin-bottom: 20px; }
-    .grid-2 { display: grid; gap: 20px; }
-    @media (min-width: 1024px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
-    .presets { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 600px; margin: 0 auto 24px; }
-    .preset-btn { border-radius: var(--radius); padding: 16px; text-align: left; cursor: pointer; border: 2px solid var(--slate-200); background: white; transition: var(--transition); }
-    .preset-btn.active { border-color: var(--primary); background: var(--primary-light); }
-    .preset-btn-top { display: flex; justify-content: space-between; margin-bottom: 8px; }
-    .preset-btn-check { font-weight: 700; color: var(--primary); visibility: hidden; }
-    .preset-btn.active .preset-btn-check { visibility: visible; }
-    .preset-btn-title { font-weight: 700; font-size: 14px; color: var(--slate-900); }
-    .preset-btn-sub { font-size: 12px; color: var(--slate-600); margin-top: 4px; }
-    .drop-zone { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 240px; border: 2px dashed var(--slate-300); border-radius: var(--radius); background: var(--slate-50); padding: 32px 20px; text-align: center; cursor: pointer; transition: var(--transition); }
-    .drop-zone:hover { border-color: #818cf8; background: rgba(238, 242, 255, 0.5); }
-    .drop-zone.dragging { border-color: var(--primary); background: var(--primary-light); transform: scale(1.01); }
-    .drop-zone-icon { width: 56px; height: 56px; border-radius: var(--radius); background: #e0e7ff; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 16px; }
-    .drop-zone-title { font-weight: 700; color: var(--slate-900); font-size: 14px; }
-    .drop-zone-btn { margin-top: 16px; padding: 10px 20px; border-radius: var(--radius-sm); background: var(--primary); color: white; font-size: 13px; font-weight: 600; border: none; cursor: pointer; }
-    .drop-zone-hint { margin-top: 12px; font-size: 11px; color: var(--slate-400); }
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: var(--transition); width: 100%; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
-    .btn-emerald { background: var(--emerald); color: white; }
-    .btn-emerald:hover:not(:disabled) { background: #047857; }
-    .btn-outline { background: white; color: var(--slate-700); border: 1px solid var(--slate-300); }
-    .btn-sm { padding: 10px 16px; font-size: 13px; }
-    .btn-xs { padding: 8px 12px; font-size: 12px; }
-    .spinner { width: 20px; height: 20px; border: 3px solid #c7d2fe; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .file-info { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border-radius: var(--radius-sm); background: var(--slate-50); margin-top: 16px; }
-    .file-info-text { min-width: 0; }
-    .file-info-name { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .file-info-meta { font-size: 11px; color: var(--slate-500); margin-top: 4px; }
-    .file-info-remove { font-size: 13px; font-weight: 600; color: var(--rose); background: none; border: none; cursor: pointer; padding: 8px 12px; border-radius: var(--radius-xs); flex-shrink: 0; }
-    .preview-image { max-height: 280px; max-width: 100%; object-fit: contain; }
-    .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .preview-box { border-radius: var(--radius-sm); border: 1px solid var(--slate-200); padding: 12px; text-align: center; }
-    .preview-box.success { border-color: #a7f3d0; background: rgba(236, 253, 245, 0.3); }
-    .preview-box-label { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--slate-500); margin-bottom: 12px; }
-    .preview-box.success .preview-box-label { color: var(--emerald); }
-    .preview-box-img { height: 140px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: var(--radius-xs); background: var(--slate-50); }
-    .preview-box.success .preview-box-img { background: white; }
-    .preview-box-meta { font-size: 11px; color: var(--slate-500); margin-top: 8px; }
-    .preview-box.success .preview-box-meta { color: var(--emerald); font-weight: 600; }
-    .status-card { margin-top: 16px; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--slate-200); display: flex; align-items: flex-start; gap: 10px; }
-    .status-card.success { border-color: #a7f3d0; background: var(--emerald-light); }
-    .status-card.warning { border-color: #fde68a; background: var(--amber-light); }
-    .status-card-icon { font-size: 18px; flex-shrink: 0; }
-    .status-card-title { font-size: 13px; font-weight: 700; }
-    .status-card-msg { font-size: 11px; color: var(--slate-600); margin-top: 2px; }
-    .status-card.success .status-card-title { color: #065f46; }
-    .status-card.warning .status-card-title { color: #92400e; }
-    .error-panel { margin-top: 16px; padding: 16px; border-radius: var(--radius-sm); border: 1px solid #fecdd3; background: var(--rose-light); color: #9f1239; font-size: 13px; }
-    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 240px; border-radius: var(--radius); border: 1px solid var(--slate-200); background: var(--slate-50); text-align: center; padding: 20px; }
-    .empty-state-icon { font-size: 40px; color: var(--slate-300); }
-    .empty-state-title { font-size: 14px; font-weight: 600; color: var(--slate-600); margin-top: 12px; }
-    .empty-state-desc { font-size: 13px; color: var(--slate-400); margin-top: 4px; }
-    .ad-container { margin: 24px 0; border-radius: var(--radius-sm); border: 1px solid var(--slate-200); background: white; padding: 8px; box-shadow: var(--shadow-sm); text-align: center; overflow: hidden; max-width: 100%; }
-    .donation-card { border-radius: var(--radius); border: 1px solid var(--slate-200); background: white; padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
-    @media (min-width: 640px) { .donation-card { flex-direction: row; align-items: center; justify-content: space-between; } }
-    .donation-title { font-weight: 700; font-size: 14px; color: var(--slate-900); }
-    .donation-desc { font-size: 12px; color: var(--slate-500); margin-top: 2px; }
-    .donation-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: var(--radius-sm); background: var(--primary-light); border: 1px solid #c7d2fe; color: var(--primary); font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
-    .modal-overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.8); padding: 16px; backdrop-filter: blur(8px); }
-    .modal-content { width: 100%; max-width: 420px; border-radius: 24px; background: white; padding: 24px; box-shadow: var(--shadow-lg); text-align: center; position: relative; max-height: 90vh; overflow-y: auto; }
-    .modal-content.wide { max-width: 640px; text-align: left; }
-    .modal-close-x { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 22px; color: var(--slate-400); cursor: pointer; }
-    .plan-card { border-radius: var(--radius); padding: 16px; text-align: left; cursor: pointer; transition: var(--transition); border: 2px solid var(--slate-200); background: white; }
-    .plan-card.selected { border-color: var(--primary); background: rgba(238, 242, 255, 0.5); }
-    .plan-card-row { display: flex; align-items: center; justify-content: space-between; }
-    .plan-card-title { font-size: 13px; font-weight: 700; color: var(--slate-800); }
-    .plan-card-sub { font-size: 11px; color: var(--slate-500); margin-top: 2px; }
-    .plan-card-price { font-size: 24px; font-weight: 900; }
-    .qr-frame { padding: 8px; border: 2px solid #c7d2fe; border-radius: var(--radius); background: white; display: inline-block; }
-    .qr-frame img { width: 144px; height: 144px; border-radius: var(--radius-xs); display: block; }
-    .utr-input { width: 100%; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--slate-300); font-size: 14px; font-weight: 700; text-align: center; letter-spacing: 3px; color: var(--slate-900); }
-    .footer { border-top: 1px solid var(--slate-200); background: white; margin-top: 40px; }
-    .footer-inner { display: flex; flex-direction: column; gap: 12px; padding: 20px 0; font-size: 12px; color: var(--slate-500); text-align: center; }
-    @media (min-width: 640px) { .footer-inner { flex-direction: row; justify-content: space-between; align-items: center; } }
-    .footer-link { font-weight: 600; color: var(--primary); background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 12px; }
-    .pdf-file-list { list-style: none; padding: 0; }
-    .pdf-file-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--radius-xs); border: 1px solid var(--slate-200); background: white; margin-bottom: 8px; }
-    .pdf-file-grip { cursor: grab; color: var(--slate-400); font-size: 16px; flex-shrink: 0; }
-    .pdf-file-info { flex: 1; min-width: 0; }
-    .pdf-file-name { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .pdf-file-size { font-size: 11px; color: var(--slate-500); }
-    .pdf-file-remove { background: none; border: none; cursor: pointer; color: var(--slate-400); font-size: 18px; padding: 4px; }
-    .img-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 16px; }
-    .img-preview-item { position: relative; border-radius: var(--radius-xs); overflow: hidden; border: 2px solid var(--slate-200); aspect-ratio: 1; background: var(--slate-50); }
-    .img-preview-item img { width: 100%; height: 100%; object-fit: cover; }
-    .img-preview-item .img-remove-btn { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; background: rgba(0, 0, 0, 0.6); color: white; border: none; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
-    .img-preview-item .img-order { position: absolute; bottom: 4px; left: 4px; font-size: 10px; font-weight: 700; color: white; background: rgba(0, 0, 0, 0.5); padding: 2px 6px; border-radius: 4px; }
-    .form-group { margin-bottom: 16px; }
-    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--slate-700); margin-bottom: 6px; }
-    .form-select, .form-input { width: 100%; padding: 10px 12px; border-radius: var(--radius-xs); border: 1px solid var(--slate-300); font-size: 13px; color: var(--slate-900); background: white; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .progress-bar { height: 6px; border-radius: 3px; background: var(--slate-200); overflow: hidden; margin-top: 12px; }
-    .progress-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #818cf8); transition: width 0.3s ease; }
-    .result-downloads { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 16px; }
-    .result-download-item { border-radius: var(--radius-xs); border: 1px solid var(--slate-200); overflow: hidden; background: white; }
-    .result-download-item img { width: 100%; display: block; }
-    .result-download-item-footer { padding: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; border-top: 1px solid var(--slate-200); }
-    .result-download-btn { background: var(--primary); color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 10px; font-weight: 600; cursor: pointer; }
-    .warning-box { padding: 12px 16px; border-radius: var(--radius-xs); border: 1px solid #fde68a; background: var(--amber-light); font-size: 12px; color: #92400e; margin-top: 12px; }
-    .info-box { padding: 12px 16px; border-radius: var(--radius-xs); border: 1px solid #bfdbfe; background: #eff6ff; font-size: 12px; color: #1e40af; margin-top: 12px; }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    @media (min-width: 640px) {
+      .container {
+        padding: 0 24px;
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    .select-none {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .header {
+      background: white;
+      border-bottom: 1px solid var(--slate-200);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      gap: 12px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition: transform 0.15s ease;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      box-shadow: var(--shadow-sm);
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--slate-900);
+      line-height: 1.2;
+    }
+
+    .logo-text span {
+      color: var(--primary);
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      color: var(--slate-500);
+      line-height: 1.2;
+    }
+
+    .status-badge {
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .status-badge.free {
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid #c7d2fe;
+    }
+
+    .status-badge.pro {
+      background: var(--emerald-light);
+      color: var(--emerald);
+      border: 1px solid #a7f3d0;
+    }
+
+    .status-badge.admin {
+      background: var(--amber-light);
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .status-badge.exhausted {
+      background: var(--rose-light);
+      color: var(--rose);
+      border: 1px solid #fecdd3;
+    }
+
+    .nav-tabs {
+      background: white;
+      border-bottom: 1px solid var(--slate-200);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .nav-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .nav-tabs-inner {
+      display: flex;
+      gap: 2px;
+      padding: 8px 0 0;
+      min-width: max-content;
+    }
+
+    .nav-tab {
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--slate-500);
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-tab:hover {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .nav-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .main {
+      padding: 24px 0 40px;
+    }
+
+    .tool-section {
+      display: none;
+    }
+
+    .tool-section.active {
+      display: block;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 20px;
+      background: var(--primary-light);
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--slate-900);
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    .section-title span {
+      color: var(--primary);
+    }
+
+    .section-desc {
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--slate-600);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    @media (min-width: 640px) {
+      .section-title {
+        font-size: 40px;
+      }
+    }
+
+    .card {
+      background: white;
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    @media (min-width: 640px) {
+      .card {
+        padding: 28px;
+      }
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--slate-900);
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--slate-500);
+      margin-top: 4px;
+      margin-bottom: 20px;
+    }
+
+    .grid-2 {
+      display: grid;
+      gap: 20px;
+    }
+
+    @media (min-width: 1024px) {
+      .grid-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .presets {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      max-width: 600px;
+      margin: 0 auto 24px;
+    }
+
+    .preset-btn {
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: left;
+      cursor: pointer;
+      border: 2px solid var(--slate-200);
+      background: white;
+      transition: var(--transition);
+    }
+
+    .preset-btn.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .preset-btn-top {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .preset-btn-check {
+      font-weight: 700;
+      color: var(--primary);
+      visibility: hidden;
+    }
+
+    .preset-btn.active .preset-btn-check {
+      visibility: visible;
+    }
+
+    .preset-btn-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--slate-900);
+    }
+
+    .preset-btn-sub {
+      font-size: 12px;
+      color: var(--slate-600);
+      margin-top: 4px;
+    }
+
+    .drop-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 240px;
+      border: 2px dashed var(--slate-300);
+      border-radius: var(--radius);
+      background: var(--slate-50);
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .drop-zone:hover {
+      border-color: #818cf8;
+      background: rgba(238, 242, 255, 0.5);
+    }
+
+    .drop-zone.dragging {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      transform: scale(1.01);
+    }
+
+    .drop-zone-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius);
+      background: #e0e7ff;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+
+    .drop-zone-title {
+      font-weight: 700;
+      color: var(--slate-900);
+      font-size: 14px;
+    }
+
+    .drop-zone-btn {
+      margin-top: 16px;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      background: var(--primary);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+
+    .drop-zone-hint {
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--slate-400);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      width: 100%;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-dark);
+    }
+
+    .btn-emerald {
+      background: var(--emerald);
+      color: white;
+    }
+
+    .btn-emerald:hover:not(:disabled) {
+      background: #047857;
+    }
+
+    .btn-outline {
+      background: white;
+      color: var(--slate-700);
+      border: 1px solid var(--slate-300);
+    }
+
+    .btn-sm {
+      padding: 10px 16px;
+      font-size: 13px;
+    }
+
+    .btn-xs {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid #c7d2fe;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      background: var(--slate-50);
+      margin-top: 16px;
+    }
+
+    .file-info-text {
+      min-width: 0;
+    }
+
+    .file-info-name {
+      font-size: 13px;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-info-meta {
+      font-size: 11px;
+      color: var(--slate-500);
+      margin-top: 4px;
+    }
+
+    .file-info-remove {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--rose);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: var(--radius-xs);
+      flex-shrink: 0;
+    }
+
+    .preview-image {
+      max-height: 280px;
+      max-width: 100%;
+      object-fit: contain;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .preview-box {
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--slate-200);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .preview-box.success {
+      border-color: #a7f3d0;
+      background: rgba(236, 253, 245, 0.3);
+    }
+
+    .preview-box-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--slate-500);
+      margin-bottom: 12px;
+    }
+
+    .preview-box.success .preview-box-label {
+      color: var(--emerald);
+    }
+
+    .preview-box-img {
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: var(--radius-xs);
+      background: var(--slate-50);
+    }
+
+    .preview-box.success .preview-box-img {
+      background: white;
+    }
+
+    .preview-box-meta {
+      font-size: 11px;
+      color: var(--slate-500);
+      margin-top: 8px;
+    }
+
+    .preview-box.success .preview-box-meta {
+      color: var(--emerald);
+      font-weight: 600;
+    }
+
+    .status-card {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--slate-200);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .status-card.success {
+      border-color: #a7f3d0;
+      background: var(--emerald-light);
+    }
+
+    .status-card.warning {
+      border-color: #fde68a;
+      background: var(--amber-light);
+    }
+
+    .status-card-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .status-card-title {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .status-card-msg {
+      font-size: 11px;
+      color: var(--slate-600);
+      margin-top: 2px;
+    }
+
+    .status-card.success .status-card-title {
+      color: #065f46;
+    }
+
+    .status-card.warning .status-card-title {
+      color: #92400e;
+    }
+
+    .error-panel {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid #fecdd3;
+      background: var(--rose-light);
+      color: #9f1239;
+      font-size: 13px;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 240px;
+      border-radius: var(--radius);
+      border: 1px solid var(--slate-200);
+      background: var(--slate-50);
+      text-align: center;
+      padding: 20px;
+    }
+
+    .empty-state-icon {
+      font-size: 40px;
+      color: var(--slate-300);
+    }
+
+    .empty-state-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--slate-600);
+      margin-top: 12px;
+    }
+
+    .empty-state-desc {
+      font-size: 13px;
+      color: var(--slate-400);
+      margin-top: 4px;
+    }
+
+    .ad-container {
+      margin: 24px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--slate-200);
+      background: white;
+      padding: 8px;
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+      overflow: hidden;
+      max-width: 100%;
+    }
+
+    .donation-card {
+      border-radius: var(--radius);
+      border: 1px solid var(--slate-200);
+      background: white;
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    @media (min-width: 640px) {
+      .donation-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .donation-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--slate-900);
+    }
+
+    .donation-desc {
+      font-size: 12px;
+      color: var(--slate-500);
+      margin-top: 2px;
+    }
+
+    .donation-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      background: var(--primary-light);
+      border: 1px solid #c7d2fe;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.8);
+      padding: 16px;
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 24px;
+      background: white;
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-content.wide {
+      max-width: 640px;
+      text-align: left;
+    }
+
+    .modal-close-x {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: var(--slate-400);
+      cursor: pointer;
+    }
+
+    .plan-card {
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: left;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 2px solid var(--slate-200);
+      background: white;
+    }
+
+    .plan-card.selected {
+      border-color: var(--primary);
+      background: rgba(238, 242, 255, 0.5);
+    }
+
+    .plan-card-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .plan-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--slate-800);
+    }
+
+    .plan-card-sub {
+      font-size: 11px;
+      color: var(--slate-500);
+      margin-top: 2px;
+    }
+
+    .plan-card-price {
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .qr-frame {
+      padding: 8px;
+      border: 2px solid #c7d2fe;
+      border-radius: var(--radius);
+      background: white;
+      display: inline-block;
+    }
+
+    .qr-frame img {
+      width: 144px;
+      height: 144px;
+      border-radius: var(--radius-xs);
+      display: block;
+    }
+
+    .utr-input {
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--slate-300);
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 3px;
+      color: var(--slate-900);
+    }
+
+    .footer {
+      border-top: 1px solid var(--slate-200);
+      background: white;
+      margin-top: 40px;
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 20px 0;
+      font-size: 12px;
+      color: var(--slate-500);
+      text-align: center;
+    }
+
+    @media (min-width: 640px) {
+      .footer-inner {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+
+    .footer-link {
+      font-weight: 600;
+      color: var(--primary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 12px;
+    }
+
+    .pdf-file-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .pdf-file-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--slate-200);
+      background: white;
+      margin-bottom: 8px;
+    }
+
+    .pdf-file-grip {
+      cursor: grab;
+      color: var(--slate-400);
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .pdf-file-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .pdf-file-name {
+      font-size: 13px;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .pdf-file-size {
+      font-size: 11px;
+      color: var(--slate-500);
+    }
+
+    .pdf-file-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--slate-400);
+      font-size: 18px;
+      padding: 4px;
+    }
+
+    .img-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .img-preview-item {
+      position: relative;
+      border-radius: var(--radius-xs);
+      overflow: hidden;
+      border: 2px solid var(--slate-200);
+      aspect-ratio: 1;
+      background: var(--slate-50);
+    }
+
+    .img-preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .img-preview-item .img-remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .img-preview-item .img-order {
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--slate-700);
+      margin-bottom: 6px;
+    }
+
+    .form-select,
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--slate-300);
+      font-size: 13px;
+      color: var(--slate-900);
+      background: white;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .progress-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: var(--slate-200);
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--primary), #818cf8);
+      transition: width 0.3s ease;
+    }
+
+    .result-downloads {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .result-download-item {
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--slate-200);
+      overflow: hidden;
+      background: white;
+    }
+
+    .result-download-item img {
+      width: 100%;
+      display: block;
+    }
+
+    .result-download-item-footer {
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      border-top: 1px solid var(--slate-200);
+    }
+
+    .result-download-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .warning-box {
+      padding: 12px 16px;
+      border-radius: var(--radius-xs);
+      border: 1px solid #fde68a;
+      background: var(--amber-light);
+      font-size: 12px;
+      color: #92400e;
+      margin-top: 12px;
+    }
+
+    .info-box {
+      padding: 12px 16px;
+      border-radius: var(--radius-xs);
+      border: 1px solid #bfdbfe;
+      background: #eff6ff;
+      font-size: 12px;
+      color: #1e40af;
+      margin-top: 12px;
+    }
   </style>
 </head>
 
@@ -282,7 +1222,7 @@
       <section id="tool-compressor" class="tool-section active">
         <div class="section-header">
           <div class="section-badge">✓ 100% Client-Side · SSC, Railway, UPSC, Police Ready</div>
-          <h1 class="section-title">Your exam photo, <span>ready to upload.</span></h1>
+          <h1 class="section-title">Photo Compressor & Signature Resizer for <span>Exam Forms</span></h1>
           <p class="section-desc">
             Instant photo (20–50 KB) & signature (10–20 KB) compression without downloading apps.
           </p>
@@ -384,7 +1324,7 @@
       <section id="tool-img2pdf" class="tool-section">
         <div class="section-header">
           <div class="section-badge">📄 Client-Side · No Upload Required</div>
-          <h1 class="section-title">Images to <span>PDF</span></h1>
+          <h2 class="section-title">Images to <span>PDF</span></h2>
           <p class="section-desc">
             Convert multiple images into a single PDF. Reorder, remove, and customize page settings.
           </p>
@@ -408,13 +1348,15 @@
                 <span style="font-size:13px; font-weight:600; color:var(--slate-700);">
                   <span id="img2pdf-count">0</span> images selected
                 </span>
-                <button type="button" id="img2pdf-clear-all" class="file-info-remove" style="margin:0">Clear All</button>
+                <button type="button" id="img2pdf-clear-all" class="file-info-remove" style="margin:0">Clear
+                  All</button>
               </div>
               <div id="img2pdf-preview-grid" class="img-preview-grid"></div>
             </div>
 
             <div style="margin-top:20px;">
-              <h3 style="font-size:14px; font-weight:700; margin-bottom:12px; color:var(--slate-800);">Page Settings</h3>
+              <h3 style="font-size:14px; font-weight:700; margin-bottom:12px; color:var(--slate-800);">Page Settings
+              </h3>
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">Page Size</label>
@@ -478,16 +1420,21 @@
       <section id="tool-pdftool" class="tool-section">
         <div class="section-header">
           <div class="section-badge">🔧 Merge · Split · Compress</div>
-          <h1 class="section-title">PDF <span>Toolkit</span></h1>
+          <h2 class="section-title">PDF <span>Toolkit</span></h2>
           <p class="section-desc">
             Merge multiple PDFs, split by page ranges, or compress PDF file size — all in your browser.
           </p>
         </div>
 
         <div style="display:flex; gap:8px; justify-content:center; margin-bottom:24px; flex-wrap:wrap;">
-          <button type="button" class="btn btn-sm pdftool-subtab active" data-subtab="merge" style="width:auto">📎 Merge</button>
-          <button type="button" class="btn btn-sm pdftool-subtab" data-subtab="split" style="width:auto; background:white; color:var(--slate-700); border:1px solid var(--slate-300);">✂️ Split</button>
-          <button type="button" class="btn btn-sm pdftool-subtab" data-subtab="compress" style="width:auto; background:white; color:var(--slate-700); border:1px solid var(--slate-300);">📦 Compress</button>
+          <button type="button" class="btn btn-sm pdftool-subtab active" data-subtab="merge" style="width:auto">📎
+            Merge</button>
+          <button type="button" class="btn btn-sm pdftool-subtab" data-subtab="split"
+            style="width:auto; background:white; color:var(--slate-700); border:1px solid var(--slate-300);">✂️
+            Split</button>
+          <button type="button" class="btn btn-sm pdftool-subtab" data-subtab="compress"
+            style="width:auto; background:white; color:var(--slate-700); border:1px solid var(--slate-300);">📦
+            Compress</button>
         </div>
 
         <!-- MERGE -->
@@ -510,10 +1457,12 @@
                   <span style="font-size:13px; font-weight:600; color:var(--slate-700);">
                     <span id="merge-file-count">0</span> files added
                   </span>
-                  <button type="button" id="merge-clear-all" class="file-info-remove" style="margin:0">Clear All</button>
+                  <button type="button" id="merge-clear-all" class="file-info-remove" style="margin:0">Clear
+                    All</button>
                 </div>
                 <ul id="merge-file-list" class="pdf-file-list"></ul>
-                <p style="font-size:11px; color:var(--slate-400); margin-top:4px;">Drag to reorder files. Files merge in listed order.</p>
+                <p style="font-size:11px; color:var(--slate-400); margin-top:4px;">Drag to reorder files. Files merge in
+                  listed order.</p>
               </div>
 
               <button id="merge-btn" type="button" disabled class="btn btn-primary" style="margin-top:16px">
@@ -573,7 +1522,8 @@
                 <div class="form-group">
                   <label class="form-label">Page Ranges</label>
                   <input id="split-ranges" type="text" class="form-input" placeholder="e.g. 1-3, 5, 8-10">
-                  <p style="font-size:11px; color:var(--slate-400); margin-top:4px;">Comma-separated ranges. Each range creates a separate PDF.</p>
+                  <p style="font-size:11px; color:var(--slate-400); margin-top:4px;">Comma-separated ranges. Each range
+                    creates a separate PDF.</p>
                 </div>
               </div>
 
@@ -625,7 +1575,8 @@
               </div>
 
               <div class="warning-box" style="margin-top:16px">
-                <strong>⚠️ Quality Note:</strong> Client-side PDF compression removes metadata and applies basic optimization. For aggressive compression, server-side tools are recommended.
+                <strong>⚠️ Quality Note:</strong> Client-side PDF compression removes metadata and applies basic
+                optimization. For aggressive compression, server-side tools are recommended.
               </div>
 
               <button id="compress-btn" type="button" disabled class="btn btn-primary" style="margin-top:16px">
@@ -663,7 +1614,7 @@
       <section id="tool-pdf2img" class="tool-section">
         <div class="section-header">
           <div class="section-badge">🖼️ Convert PDF Pages to Images</div>
-          <h1 class="section-title">PDF to <span>Image</span></h1>
+          <h2 class="section-title">PDF to <span>Image</span></h2>
           <p class="section-desc">
             Convert PDF pages to PNG or JPG images. Select pages, choose resolution, download individually or as ZIP.
           </p>
@@ -713,7 +1664,8 @@
               <div class="form-group">
                 <label class="form-label">Page Ranges (leave empty for all pages)</label>
                 <input id="pdf2img-ranges" type="text" class="form-input" placeholder="e.g. 1-3, 5, 8-10">
-                <p style="font-size:11px; color:var(--slate-400); margin-top:4px;">Comma-separated ranges. Leave empty to convert all pages.</p>
+                <p style="font-size:11px; color:var(--slate-400); margin-top:4px;">Comma-separated ranges. Leave empty
+                  to convert all pages.</p>
               </div>
             </div>
 
@@ -749,6 +1701,37 @@
         </div>
       </section>
 
+      <!-- SEO Content Section -->
+      <section class="card" style="margin-top:32px;">
+        <h2 style="font-size:20px; font-weight:800; color:var(--slate-900); margin-bottom:16px;">About Photo Compressor
+          ExamReady</h2>
+        <div style="font-size:14px; color:var(--slate-600); line-height:1.8;">
+          <p style="margin-bottom:12px;">
+            <strong>Photo Compressor ExamReady</strong> is a free online photo resizer built for students and applicants
+            who need to
+            compress photos to specific KB sizes for online exam forms. Whether you need a passport photo under 50 KB or
+            a
+            signature image under 20 KB, this photo compressor handles it instantly — right inside your browser.
+          </p>
+          <p style="margin-bottom:12px;">
+            Resize and compress photos in KB for SSC, UPSC, Railway, Police, and other government exam applications.
+            The exam photo resizer automatically adjusts dimensions to 350×450 px for passport photos and 300×120 px for
+            signatures, matching common requirements for online exam forms.
+          </p>
+          <p style="margin-bottom:12px;">
+            Beyond photo compression, ExamReady includes a full set of PDF tools: convert images to PDF, merge multiple
+            PDFs into one, split a PDF by page range, and compress PDF file size. All processing runs client-side in
+            your
+            browser — your files are never uploaded to a server.
+          </p>
+          <p>
+            Use Photo Compressor ExamReady anytime you need a free online photo resizer, photo resize in KB, image to
+            PDF
+            converter, or PDF compressor. No downloads, no sign-ups — just open and use.
+          </p>
+        </div>
+      </section>
+
       <!-- Donation Card -->
       <section class="donation-card">
         <div>
@@ -774,13 +1757,15 @@
   <div id="owner-vip-modal" class="modal-overlay hidden">
     <div class="modal-content" style="border: 2px solid #fbbf24;">
       <div style="font-size:40px; margin-bottom:8px;">👑</div>
-      <span style="display:inline-block; border-radius:20px; background:#fef3c7; color:#92400e; font-size:11px; font-weight:800; text-transform:uppercase; padding:4px 12px; letter-spacing:1px; margin-bottom:8px;">
+      <span
+        style="display:inline-block; border-radius:20px; background:#fef3c7; color:#92400e; font-size:11px; font-weight:800; text-transform:uppercase; padding:4px 12px; letter-spacing:1px; margin-bottom:8px;">
         Owner Verified
       </span>
       <h3 style="font-size:20px; font-weight:800; color:var(--slate-900);">Welcome, Creator!</h3>
       <p style="font-size:12px; color:var(--slate-500); margin-top:4px;">Aapka secret bypass activate ho gaya hai.</p>
 
-      <div style="margin:16px 0; border-radius:var(--radius); background:rgba(254,243,199,0.7); border:1px solid #fde68a; padding:16px; text-align:left;">
+      <div
+        style="margin:16px 0; border-radius:var(--radius); background:rgba(254,243,199,0.7); border:1px solid #fde68a; padding:16px; text-align:left;">
         <p style="font-size:12px; font-weight:700; color:#78350f;">Privileges Unlocked:</p>
         <ul style="font-size:11px; color:#92400e; margin-top:6px; padding-left:16px;">
           <li>✓ Zero Limits & No Payment Wall</li>
@@ -799,19 +1784,24 @@
   <!-- PAYWALL MODAL -->
   <div id="paywall-modal" class="modal-overlay hidden">
     <div class="modal-content">
-      <div style="display:inline-flex; align-items:center; gap:6px; border-radius:20px; background:var(--amber-light); border:1px solid #fde68a; padding:4px 12px; font-size:11px; font-weight:700; color:#92400e; margin-bottom:8px;">
+      <div
+        style="display:inline-flex; align-items:center; gap:6px; border-radius:20px; background:var(--amber-light); border:1px solid #fde68a; padding:4px 12px; font-size:11px; font-weight:700; color:#92400e; margin-bottom:8px;">
         ⚡ Daily Free Limit Reached
       </div>
 
       <h3 style="font-size:20px; font-weight:800; color:var(--slate-900);">Unlock More Downloads</h3>
-      <p style="font-size:12px; color:var(--slate-500); margin-top:4px;">Aapke 4 free credits aaj ke liye khatam ho chuke hain.</p>
+      <p style="font-size:12px; color:var(--slate-500); margin-top:4px;">Aapke 4 free credits aaj ke liye khatam ho
+        chuke hain.</p>
 
-      <div style="margin:12px 0; border-radius:var(--radius-sm); background:var(--slate-100); padding:8px; font-size:12px; font-weight:500; color:var(--slate-600);">
-        Agla free quota reset hoga: <span id="reset-in-timer" style="font-weight:700; color:var(--primary);">--:--</span>
+      <div
+        style="margin:12px 0; border-radius:var(--radius-sm); background:var(--slate-100); padding:8px; font-size:12px; font-weight:500; color:var(--slate-600);">
+        Agla free quota reset hoga: <span id="reset-in-timer"
+          style="font-weight:700; color:var(--primary);">--:--</span>
       </div>
 
       <div id="pay-initial-step" style="margin-top:16px;">
-        <div id="plan-single-card" class="plan-card selected" onclick="selectPlan('single')" style="margin-bottom:12px;">
+        <div id="plan-single-card" class="plan-card selected" onclick="selectPlan('single')"
+          style="margin-bottom:12px;">
           <div class="plan-card-row">
             <div>
               <span id="single-plan-title" class="plan-card-title">Quick Exam Pass</span>
@@ -826,7 +1816,9 @@
             <div>
               <div style="display:flex; align-items:center; gap:6px;">
                 <span class="plan-card-title">1 Month Cyber/Pro Pass</span>
-                <span style="padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; background: #fef3c7; color: #92400e;">Best Value</span>
+                <span
+                  style="padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; background: #fef3c7; color: #92400e;">Best
+                  Value</span>
               </div>
               <p class="plan-card-sub">Full 30 Days Unlimited Downloads</p>
             </div>
@@ -840,7 +1832,8 @@
       </div>
 
       <div id="pay-qr-step" class="hidden">
-        <div style="display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; font-weight:600; color:var(--rose); background:var(--rose-light); border:1px solid #fecdd3; padding:8px; border-radius:var(--radius-sm); margin-bottom:12px;">
+        <div
+          style="display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; font-weight:600; color:var(--rose); background:var(--rose-light); border:1px solid #fecdd3; padding:8px; border-radius:var(--radius-sm); margin-bottom:12px;">
           <span>⏳ QR Code valid for:</span>
           <span id="countdown-timer" style="font-family:monospace; font-weight:700; font-size:14px;">02:00</span>
         </div>
@@ -855,11 +1848,13 @@
           Scan & Pay via PhonePe, Google Pay, Paytm, or BHIM
         </p>
 
-        <div style="margin-top:16px; border-radius:var(--radius); border:1px solid #c7d2fe; background:rgba(238,242,255,0.5); padding:12px; text-align:left;">
+        <div
+          style="margin-top:16px; border-radius:var(--radius); border:1px solid #c7d2fe; background:rgba(238,242,255,0.5); padding:12px; text-align:left;">
           <label for="utr-input" style="font-size:12px; font-weight:700; color:var(--slate-800);">
             Enter 12-Digit UPI / UTR Reference No. <span style="color:var(--rose);">*</span>
           </label>
-          <p style="font-size:10px; color:var(--slate-500); margin-top:2px;">Payment app ki history me 12-digit UTR/Ref number dekhein.</p>
+          <p style="font-size:10px; color:var(--slate-500); margin-top:2px;">Payment app ki history me 12-digit UTR/Ref
+            number dekhein.</p>
           <input id="utr-input" type="text" maxlength="12" inputmode="numeric" placeholder="e.g. 4289XXXXXXXX"
             class="utr-input" style="margin-top:8px;">
           <p id="utr-error" class="hidden" style="margin-top:6px; font-size:11px; font-weight:600; color:var(--rose);">
@@ -868,7 +1863,8 @@
         </div>
 
         <button id="paid-verify-button" type="button" class="btn btn-emerald" style="margin-top:14px;">
-          <span id="utr-verify-spinner" class="spinner hidden" style="width:16px; height:16px; border-width:2px;"></span>
+          <span id="utr-verify-spinner" class="spinner hidden"
+            style="width:16px; height:16px; border-width:2px;"></span>
           <span id="utr-verify-label">Submit for Manual Verification</span>
         </button>
 
@@ -876,17 +1872,20 @@
           <div class="info-box">
             <strong>📋 Verification Submitted</strong><br>
             Your UTR has been recorded. Since we do not use a backend server to auto-verify, contact
-            <a href="mailto:darshsolanki55@gmail.com" style="color:var(--primary); font-weight:600;">darshsolanki55@gmail.com</a>
+            <a href="mailto:darshsolanki55@gmail.com"
+              style="color:var(--primary); font-weight:600;">darshsolanki55@gmail.com</a>
             with your UTR for instant manual activation.
           </div>
         </div>
 
-        <button id="back-to-plans-btn" type="button" style="margin-top:10px; font-size:12px; color:var(--primary); font-weight:600; background:none; border:none; cursor:pointer;">
+        <button id="back-to-plans-btn" type="button"
+          style="margin-top:10px; font-size:12px; color:var(--primary); font-weight:600; background:none; border:none; cursor:pointer;">
           ← Change Plan
         </button>
       </div>
 
-      <button id="close-modal-btn" type="button" style="margin-top:12px; font-size:12px; color:var(--slate-400); background:none; border:none; cursor:pointer;">
+      <button id="close-modal-btn" type="button"
+        style="margin-top:12px; font-size:12px; color:var(--slate-400); background:none; border:none; cursor:pointer;">
         Cancel & Wait for 24h Reset
       </button>
     </div>
@@ -897,16 +1896,19 @@
     <div class="modal-content">
       <div style="font-size:32px; margin-bottom:4px;">☕</div>
       <h3 style="font-size:18px; font-weight:700; color:var(--slate-900);">Support ExamReady</h3>
-      <p style="font-size:12px; color:var(--slate-500); margin-top:4px;">Ek chai ke barabar contribution server online rakhta hai.</p>
+      <p style="font-size:12px; color:var(--slate-500); margin-top:4px;">Ek chai ke barabar contribution server online
+        rakhta hai.</p>
 
       <div style="display:flex; justify-content:center; margin:12px 0;">
         <div class="qr-frame">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi%3A%2F%2Fpay%3Fpa%3D6351695089%40fam%26pn%3DExamReadySupport%26am%3D10%26cu%3DINR"
+          <img
+            src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi%3A%2F%2Fpay%3Fpa%3D6351695089%40fam%26pn%3DExamReadySupport%26am%3D10%26cu%3DINR"
             alt="Donation QR" style="width:128px; height:128px;">
         </div>
       </div>
 
-      <p style="font-size:12px; font-weight:600; color:var(--primary); background:var(--primary-light); padding:8px; border-radius:var(--radius-xs); user-select:all;">
+      <p
+        style="font-size:12px; font-weight:600; color:var(--primary); background:var(--primary-light); padding:8px; border-radius:var(--radius-xs); user-select:all;">
         UPI: 6351695089@fam
       </p>
 
@@ -926,10 +1928,15 @@
 
       <div style="font-size:13px; color:var(--slate-600); line-height:1.7;">
         <p style="color:var(--slate-500); font-style:italic; margin-bottom:16px;">Effective Date: October 2026</p>
-        <p>Welcome to <strong>ExamReady — Photo Compressor & PDF Tools</strong>. Your privacy is our highest priority.</p>
-        <h4 style="font-weight:700; color:var(--slate-800); font-size:14px; margin-top:16px; margin-bottom:4px;">1. 100% Client-Side Processing</h4>
-        <p>All photo resizing, image-to-PDF, and PDF manipulations happen locally within your device browser using HTML5 Canvas and JavaScript libraries. <strong>Your photos and documents are NEVER uploaded to any server.</strong></p>
-        <h4 style="font-weight:700; color:var(--slate-800); font-size:14px; margin-top:16px; margin-bottom:4px;">2. Zero Data Collection</h4>
+        <p>Welcome to <strong>ExamReady — Photo Compressor & PDF Tools</strong>. Your privacy is our highest priority.
+        </p>
+        <h4 style="font-weight:700; color:var(--slate-800); font-size:14px; margin-top:16px; margin-bottom:4px;">1. 100%
+          Client-Side Processing</h4>
+        <p>All photo resizing, image-to-PDF, and PDF manipulations happen locally within your device browser using HTML5
+          Canvas and JavaScript libraries. <strong>Your photos and documents are NEVER uploaded to any server.</strong>
+        </p>
+        <h4 style="font-weight:700; color:var(--slate-800); font-size:14px; margin-top:16px; margin-bottom:4px;">2. Zero
+          Data Collection</h4>
         <p>We do not collect names, phone numbers, email addresses, or photos. No user sign-in required.</p>
       </div>
 
@@ -944,7 +1951,7 @@
   <!-- FOOTER -->
   <footer class="footer">
     <div class="container footer-inner">
-      <div>ExamReady · Privacy First Image & PDF Tools · Automatic 24h Reset</div>
+      <div>Photo Compressor ExamReady · Free Photo & PDF Tools for Exam Forms</div>
       <div style="display:flex; align-items:center; gap:12px; justify-content:center;">
         <button id="open-privacy-btn" type="button" class="footer-link">Privacy Policy</button>
         <span>·</span>
@@ -1154,7 +2161,7 @@
 
     function getCurrentSinglePrice() { return localStorage.getItem("examready_paid_once") === "true" ? 29 : 19; }
 
-    window.selectPlan = function(type) {
+    window.selectPlan = function (type) {
       selectedPlanType = type;
       const singleCard = $("plan-single-card");
       const monthCard = $("plan-month-card");
@@ -2082,4 +3089,5 @@
   <script data-cfasync="false" src="https://bauval.org/14/b94b7523d8994e72f4858a3fdbf64369"></script>
 
 </body>
+
 </html>
