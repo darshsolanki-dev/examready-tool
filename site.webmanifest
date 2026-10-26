@@ -1,8 +1,8 @@
 {
   "id": "https://examready-tool.vercel.app/",
-  "name": "Photo Compressor - Exam Ready",
-  "short_name": "PhotoCompress",
-  "description": "Convert and resize photos to 20KB–50KB and signature to 10–20KB for SSC, UPSC and Sarkari exam forms.",
+  "name": "Photo Compressor ExamReady",
+  "short_name": "ExamReady",
+  "description": "Compress photos to KB sizes and resize photos and signatures for online exam forms. Free online photo compressor, image to PDF and PDF tools for students and applicants.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -30,16 +30,28 @@
       "type": "image/png"
     },
     {
-      "src": "/apple-touch-icon.png",
+      "src": "/android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/apple-touch-icon.png",
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
@@ -48,14 +60,14 @@
       "short_name": "Passport",
       "description": "Compress photo to 20KB-50KB",
       "url": "/?mode=passport",
-      "icons": [{ "src": "/apple-touch-icon.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
     },
     {
       "name": "Signature (10-20KB)",
       "short_name": "Signature",
       "description": "Compress signature to 10KB-20KB",
       "url": "/?mode=signature",
-      "icons": [{ "src": "/apple-touch-icon.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
     }
   ]
 }
