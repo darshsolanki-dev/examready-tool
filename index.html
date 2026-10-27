@@ -1970,18 +1970,6 @@
   <script>
     "use strict";
 
-    // Block Inspect Element & Context Menu for Native App Feel
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-    document.addEventListener('keydown', (e) => {
-      if (
-        e.key === 'F12' ||
-        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
-        (e.ctrlKey && e.key === 'u')
-      ) {
-        e.preventDefault();
-      }
-    });
-
     // --- ADSTERRA SMARTLINK INTEGRATION ---
     const ADSTERRA_DIRECT_LINK = "https://asiafilm.org/4/7dd089ccd54a10b01e1be6f140edd04f";
 
