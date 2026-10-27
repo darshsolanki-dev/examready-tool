@@ -769,6 +769,11 @@
       max-width: 100%;
     }
 
+    .ad-container iframe {
+      max-width: 100%;
+      height: auto;
+    }
+
     .donation-card {
       border-radius: var(--radius);
       border: 1px solid var(--slate-200);
@@ -1952,7 +1957,9 @@
   <footer class="footer">
     <div class="container footer-inner">
       <div>Photo Compressor ExamReady · Free Photo & PDF Tools for Exam Forms</div>
-      <div style="display:flex; align-items:center; gap:12px; justify-content:center;">
+      <div style="display:flex; align-items:center; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <a href="/about.html" class="footer-link" style="text-decoration:underline;">About</a>
+        <span>·</span>
         <button id="open-privacy-btn" type="button" class="footer-link">Privacy Policy</button>
         <span>·</span>
         <span>© 2026 ExamReady</span>
@@ -2064,6 +2071,7 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("mode") === "signature") setMode("signature");
+    else if (urlParams.get("mode") === "passport") setMode("passport");
     if (urlParams.get("tab")) {
       const tabBtn = document.querySelector(`.nav-tab[data-tab="${urlParams.get("tab")}"]`);
       if (tabBtn) tabBtn.click();
@@ -2544,6 +2552,20 @@
     ["dragenter", "dragover"].forEach(n => { img2pdfDropzone.addEventListener(n, e => { e.preventDefault(); img2pdfDropzone.classList.add("dragging"); }); });
     ["dragleave", "drop"].forEach(n => { img2pdfDropzone.addEventListener(n, e => { e.preventDefault(); img2pdfDropzone.classList.remove("dragging"); }); });
     img2pdfDropzone.addEventListener("drop", e => { if (e.dataTransfer?.files) img2pdfAddFiles(e.dataTransfer.files); });
+
+    // Helper: convert any image file (including WebP) to JPEG ArrayBuffer via Canvas
+    async function imageFileToJpegArrayBuffer(file) {
+      const bitmap = await createImageBitmap(file);
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(bitmap, 0, 0);
+      const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", 0.92));
+      return blob.arrayBuffer();
+    }
     $("img2pdf-clear-all").addEventListener("click", () => {
       img2pdfState.images.forEach(i => URL.revokeObjectURL(i.url));
       img2pdfState.images = [];
@@ -2566,12 +2588,17 @@
         const margin = parseInt($("img2pdf-margin").value) || 0;
 
         for (const item of img2pdfState.images) {
-          const arrayBuffer = await item.file.arrayBuffer();
           let embeddedImg;
           if (item.file.type === "image/png") {
+            const arrayBuffer = await item.file.arrayBuffer();
             embeddedImg = await pdfDoc.embedPng(arrayBuffer);
-          } else {
+          } else if (item.file.type === "image/jpeg") {
+            const arrayBuffer = await item.file.arrayBuffer();
             embeddedImg = await pdfDoc.embedJpg(arrayBuffer);
+          } else {
+            // WebP or other formats: convert to JPEG via Canvas
+            const jpegBuffer = await imageFileToJpegArrayBuffer(item.file);
+            embeddedImg = await pdfDoc.embedJpg(jpegBuffer);
           }
           const imgWidth = embeddedImg.width;
           const imgHeight = embeddedImg.height;
@@ -2671,6 +2698,19 @@
       mergeInput.value = "";
     });
 
+    // Merge drag-and-drop
+    const mergeDropzone = $("merge-dropzone");
+    ["dragenter", "dragover"].forEach(n => { mergeDropzone.addEventListener(n, e => { e.preventDefault(); mergeDropzone.classList.add("dragging"); }); });
+    ["dragleave", "drop"].forEach(n => { mergeDropzone.addEventListener(n, e => { e.preventDefault(); mergeDropzone.classList.remove("dragging"); }); });
+    mergeDropzone.addEventListener("drop", e => {
+      if (e.dataTransfer?.files) {
+        for (const file of e.dataTransfer.files) {
+          if (file.type === "application/pdf") mergeState.files.push({ file, id: ++mergeState.idCounter });
+        }
+        mergeRenderFiles();
+      }
+    });
+
     $("merge-clear-all").addEventListener("click", () => {
       mergeState.files = [];
       mergeRenderFiles();
@@ -2722,10 +2762,8 @@
     const splitState = { file: null, pdfDoc: null, totalPages: 0, resultBlobs: [] };
     const splitInput = $("split-input");
 
-    splitInput.addEventListener("change", async e => {
-      const file = e.target.files[0];
+    async function splitAcceptFile(file) {
       if (!file || file.type !== "application/pdf") return;
-      splitInput.value = "";
       splitState.file = file;
       try {
         const buf = await file.arrayBuffer();
@@ -2743,7 +2781,19 @@
         $("split-error").textContent = `Could not read PDF: ${err.message}`;
         $("split-error").classList.remove("hidden");
       }
+    }
+
+    splitInput.addEventListener("change", async e => {
+      const file = e.target.files[0];
+      splitInput.value = "";
+      await splitAcceptFile(file);
     });
+
+    // Split drag-and-drop
+    const splitDropzone = $("split-dropzone");
+    ["dragenter", "dragover"].forEach(n => { splitDropzone.addEventListener(n, e => { e.preventDefault(); splitDropzone.classList.add("dragging"); }); });
+    ["dragleave", "drop"].forEach(n => { splitDropzone.addEventListener(n, e => { e.preventDefault(); splitDropzone.classList.remove("dragging"); }); });
+    splitDropzone.addEventListener("drop", e => { if (e.dataTransfer?.files?.[0]) splitAcceptFile(e.dataTransfer.files[0]); });
 
     $("split-remove").addEventListener("click", () => {
       splitState.file = null;
@@ -2856,16 +2906,26 @@
     const compressState = { file: null, resultBlob: null };
     const compressInput = $("compress-input");
 
-    compressInput.addEventListener("change", e => {
-      const file = e.target.files[0];
+    function compressAcceptFile(file) {
       if (!file || file.type !== "application/pdf") return;
-      compressInput.value = "";
       compressState.file = file;
       $("compress-file-name").textContent = file.name;
       $("compress-file-meta").textContent = formatBytes(file.size);
       $("compress-file-info").classList.remove("hidden");
       $("compress-btn").disabled = false;
+    }
+
+    compressInput.addEventListener("change", e => {
+      const file = e.target.files[0];
+      compressInput.value = "";
+      compressAcceptFile(file);
     });
+
+    // Compress drag-and-drop
+    const compressDropzone = $("compress-dropzone");
+    ["dragenter", "dragover"].forEach(n => { compressDropzone.addEventListener(n, e => { e.preventDefault(); compressDropzone.classList.add("dragging"); }); });
+    ["dragleave", "drop"].forEach(n => { compressDropzone.addEventListener(n, e => { e.preventDefault(); compressDropzone.classList.remove("dragging"); }); });
+    compressDropzone.addEventListener("drop", e => { if (e.dataTransfer?.files?.[0]) compressAcceptFile(e.dataTransfer.files[0]); });
 
     $("compress-remove").addEventListener("click", () => {
       compressState.file = null;
@@ -2890,7 +2950,13 @@
 
         $("compress-empty").classList.add("hidden");
         $("compress-result").classList.remove("hidden");
-        $("compress-status-card").className = newSize >= originalSize ? "status-card warning" : "status-card success";
+        if (newSize >= originalSize) {
+          $("compress-status-card").className = "status-card warning";
+          $("compress-result-title").textContent = "No Size Reduction Achieved";
+        } else {
+          $("compress-status-card").className = "status-card success";
+          $("compress-result-title").textContent = "Compression Complete";
+        }
         $("compress-result-info").textContent = `${formatBytes(originalSize)} → ${formatBytes(newSize)}`;
       } catch (err) {
         $("compress-error").textContent = err.message || "Failed to compress PDF.";
@@ -2937,10 +3003,8 @@
     const pdf2imgState = { file: null, totalPages: 0, resultImages: [] };
     const pdf2imgInput = $("pdf2img-input");
 
-    pdf2imgInput.addEventListener("change", async e => {
-      const file = e.target.files[0];
+    async function pdf2imgAcceptFile(file) {
       if (!file || file.type !== "application/pdf") return;
-      pdf2imgInput.value = "";
       pdf2imgState.file = file;
 
       try {
@@ -2958,7 +3022,19 @@
         $("pdf2img-error").textContent = `Could not read PDF: ${err.message}`;
         $("pdf2img-error").classList.remove("hidden");
       }
+    }
+
+    pdf2imgInput.addEventListener("change", async e => {
+      const file = e.target.files[0];
+      pdf2imgInput.value = "";
+      await pdf2imgAcceptFile(file);
     });
+
+    // PDF to Image drag-and-drop
+    const pdf2imgDropzone = $("pdf2img-dropzone");
+    ["dragenter", "dragover"].forEach(n => { pdf2imgDropzone.addEventListener(n, e => { e.preventDefault(); pdf2imgDropzone.classList.add("dragging"); }); });
+    ["dragleave", "drop"].forEach(n => { pdf2imgDropzone.addEventListener(n, e => { e.preventDefault(); pdf2imgDropzone.classList.remove("dragging"); }); });
+    pdf2imgDropzone.addEventListener("drop", e => { if (e.dataTransfer?.files?.[0]) pdf2imgAcceptFile(e.dataTransfer.files[0]); });
 
     $("pdf2img-remove").addEventListener("click", () => {
       pdf2imgState.file = null;
