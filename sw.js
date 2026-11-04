@@ -1,4 +1,4 @@
-const CACHE_NAME = 'examready-v12';
+const CACHE_NAME = 'examready-v13';
 
 // Core pages that must be cached for offline navigation
 const CORE_PAGES = [
