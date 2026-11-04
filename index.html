@@ -2202,14 +2202,20 @@
       clearInterval(countdownInterval);
       let timer = durationSeconds;
       function updateDisplay() {
-        let minutes = Math.floor(timer / 60);
-        let seconds = timer % 60;
+        const minutes = Math.floor(timer / 60);
+        const seconds = timer % 60;
         elC.countdownTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
       }
       updateDisplay();
       countdownInterval = setInterval(() => {
         timer--;
-        if (timer < 0) timer = 120;
+        if (timer <= 0) {
+          timer = 0;
+          updateDisplay();
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+          return;
+        }
         updateDisplay();
       }, 1000);
     }
@@ -2261,6 +2267,12 @@
 
     $("open-donation-btn").addEventListener("click", () => elC.donationModal.classList.remove("hidden"));
     $("close-donation-btn").addEventListener("click", () => elC.donationModal.classList.add("hidden"));
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[char]);
+    }
 
     function formatBytes(bytes) {
       if (bytes < 1024) return `${bytes} bytes`;
@@ -2674,7 +2686,7 @@
           <span class="pdf-file-grip">⠿</span>
           <span style="font-size: 20px;">📄</span>
           <div class="pdf-file-info">
-            <div class="pdf-file-name">${item.file.name}</div>
+            <div class="pdf-file-name">${escapeHTML(item.file.name)}</div>
             <div class="pdf-file-size">${formatBytes(item.file.size)}</div>
           </div>
           <button type="button" class="pdf-file-remove" data-id="${item.id}">✕</button>
@@ -2857,7 +2869,7 @@
           div.style.marginBottom = "8px";
           div.innerHTML = `
             <div class="file-info-text">
-              <p class="file-info-name">${item.name}</p>
+              <p class="file-info-name">${escapeHTML(item.name)}</p>
               <p class="file-info-meta">Pages: ${item.pages} · ${formatBytes(item.blob.size)}</p>
             </div>
             <button type="button" class="btn btn-xs btn-primary split-dl-btn" data-index="${i}" style="width:auto;">↓</button>
